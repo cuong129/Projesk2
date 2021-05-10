@@ -1,1 +1,55 @@
-{"web":{"client_id":"706435595456-8l4a2bfar9v6vuggnlnuv0tgmfbtus1u.apps.googleusercontent.com","project_id":"projesk2","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs"}}
+{
+  "project_info": {
+    "project_number": "706435595456",
+    "project_id": "projesk2",
+    "storage_bucket": "projesk2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706435595456:android:8ccc7b9f5bad713f058125",
+        "android_client_info": {
+          "package_name": "com.projesk2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "706435595456-tn7qm618qe7klactgkh8ujkkaeee9n9q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.projesk2",
+            "certificate_hash": "08da31aed92e49b832bb071604f98ca1fb8a6884"
+          }
+        },
+        {
+          "client_id": "706435595456-v3kqhegp5s18n38e9oq7abfqk727clhf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.projesk2",
+            "certificate_hash": "e7be733cca62e10c2950f87776ca17e137263e97"
+          }
+        },
+        {
+          "client_id": "706435595456-asko46clmok3aq8f8v7geppdjkkto3eu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKMm3_mCqW_mUQ_2NByUVBQuUcyY4ku7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "706435595456-8l4a2bfar9v6vuggnlnuv0tgmfbtus1u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

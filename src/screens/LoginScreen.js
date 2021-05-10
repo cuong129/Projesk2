@@ -63,7 +63,7 @@ export default class LoginScreen extends Component {
           <Header transparent>
             <Left>
               <Button transparent>
-                <Icon name="arrowleft" style={{ color: colors.theme }} type="AntDesign" />
+                <Icon name="arrowleft" style={{ color: colors.Primary }} type="AntDesign" />
               </Button>
             </Left>
             <Body>
@@ -120,7 +120,7 @@ export default class LoginScreen extends Component {
 
 const styles = StyleSheet.create({
   title: {
-    color: colors.theme,
+    color: colors.Primary,
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 30,
     paddingVertical: 5,
-    backgroundColor: colors.theme,
+    backgroundColor: colors.Primary,
   },
   icon: {
     color: colors.gray,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   GoogleIcon: {
-    color: colors.theme,
+    color: colors.Primary,
     fontSize: 28,
   },
   textInput: {
@@ -159,6 +159,6 @@ const styles = StyleSheet.create({
   forgotPassword: {
     padding: 10,
     marginVertical: 20,
-    color: colors.theme,
+    color: colors.Primary,
   }
 })
