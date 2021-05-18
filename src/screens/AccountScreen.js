@@ -19,19 +19,37 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import {AuthContext} from '../context';
+import {auth} from '../firebase';
 
 export default class ListIconExample extends Component {
+  static contextType = AuthContext;
+  constructor(props) {
+    super(props);
+
+    this.currentUser = auth().currentUser;
+  }
+
   render() {
+    const {signOut} = this.context;
     return (
       <Container style={{backgroundColor: colors.Background}}>
-        <FocusAwareStatusBar backgroundColor={colors.Background} barStyle="dark-content" />
+        <FocusAwareStatusBar
+          backgroundColor={colors.Background}
+          barStyle="dark-content"
+        />
         <Content>
           <View style={styles.viewInfo}>
-            <Image style={styles.imageCircle} />
-            <Text>Luân Nguyễn</Text>
-            <Text note>xuanluan1412@gmail.com</Text>
+            <Image
+              style={styles.imageCircle}
+              source={{
+                uri: this.currentUser.photoURL,
+              }}
+            />
+            <Text>{this.currentUser.displayName}</Text>
+            <Text note>{this.currentUser.email}</Text>
           </View>
 
           <TouchableOpacity activeOpacity={0.5} style={styles.ripple}>
@@ -45,7 +63,10 @@ export default class ListIconExample extends Component {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.5} style={styles.ripple}>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.ripple}
+            onPress={() => signOut()}>
             <View style={styles.viewItem}>
               <Icon
                 active
@@ -68,9 +89,9 @@ const styles = StyleSheet.create({
   },
 
   imageCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#3773E1',
     marginBottom: 5,
   },

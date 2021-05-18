@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, useState} from 'react';
 import {
   Container,
   Header,
@@ -8,9 +8,6 @@ import {
   Button,
   Icon,
   Title,
-  Content,
-  Card,
-  Text,
 } from 'native-base';
 import {
   ImageBackground,
@@ -20,23 +17,26 @@ import {
   StyleSheet,
   View,
   FlatList,
-  TouchableOpacity,
-  Dimensions
+  TextInput,
 } from 'react-native';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 import ListTaskItem from '../components/ListTaskItem';
 import TaskItem from '../components/TaskItem';
 import {Board, RowRepository} from '../components/Board/index';
-
-const deviceHeight = Dimensions.get('window').height;
+import {ListTaskAlert} from '../components/AlertCustom/index';
 
 export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      showAddList: false,
+    };
     const data = [
       {
         id: 1,
         name: 'To do',
+        color: '#DA3553',
         rows: [
           {id: 1, name: 'Map'},
           {id: 2, name: 'Grid'},
@@ -46,17 +46,19 @@ export default class ProjectScreen extends Component {
       {
         id: 2,
         name: 'Done',
+        color: '#01A5F4',
         rows: [{id: 3, name: 'Boss'}],
       },
       {
         id: 3,
         name: 'Doing',
+        color: '#FFD800',
         rows: [{id: 5, name: 'collision'}],
       },
     ];
 
-    this.state = {rowRepository: new RowRepository(data)};
-    this.project = this.props.route.params.project;
+    (this.rowRepository = new RowRepository(data)),
+      (this.project = this.props.route.params.project);
   }
 
   SetDefaultStyleImage = url => {
@@ -68,6 +70,14 @@ export default class ProjectScreen extends Component {
     if (url == null) return require('../res/images/ic_app.png');
     return require('../res/images/background.jpg');
   };
+
+  AddList = () => {
+    this.setState({showAddList: true});
+  };
+
+  showAlert() {
+    if (this.state.showAddList) return <ListTaskAlert screen={this} />;
+  }
 
   render() {
     return (
@@ -89,14 +99,18 @@ export default class ProjectScreen extends Component {
               <Title>{this.project.name}</Title>
             </Body>
             <Right>
+              <Button transparent onPress={this.AddList.bind(this)}>
+                <Icon name="add-outline" />
+              </Button>
               <Button transparent>
                 <Icon name="ellipsis-vertical" />
               </Button>
             </Right>
           </Header>
+          {this.showAlert()}
           <Board
             contentContainerStyle={styles.containerListTask}
-            rowRepository={this.state.rowRepository}
+            rowRepository={this.rowRepository}
             renderRow={this.renderRow.bind(this)}
             renderColumnWrapper={this.renderColumnWrapper.bind(this)}
             open={this.onOpen.bind(this)}
@@ -120,11 +134,11 @@ export default class ProjectScreen extends Component {
     );
   }
 
-  renderColumnWrapper(column, index, columnComponent, drag) {
+  renderColumnWrapper(column, index, columnComponent) {
     return (
-      <TouchableOpacity style={styles.itemListTask} onLongPress={drag} activeOpacity={0.8}>
+      <View style={styles.itemListTask}>
         <ListTaskItem columnTask={column} component={columnComponent} />
-      </TouchableOpacity>
+      </View>
     );
   }
 
@@ -144,11 +158,13 @@ const styles = StyleSheet.create({
   },
   itemListTask: {
     margin: 10,
+    marginBottom: 20,
   },
   containerListTask: {
     paddingHorizontal: 10,
   },
   cardTask: {
     width: 280,
+    alignSelf: 'center',
   },
 });

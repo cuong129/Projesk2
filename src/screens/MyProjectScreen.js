@@ -11,33 +11,94 @@ import {
   Input,
   Fab,
 } from 'native-base';
-import {StyleSheet, FlatList, View} from 'react-native';
-import colors from '../res/colors';
+import {StyleSheet, FlatList, View, ActivityIndicator} from 'react-native';
+import {colors} from '../res/colors';
 import ProjectItem from '../components/ProjectItem';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import {AddProjectAlert} from '../components/AlertCustom/index';
+import {auth, firestore} from '../firebase';
 
 export default class ListThumbnailExample extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       projects: [
-        {
-          id: 1,
-          name: 'Game',
-          note: '10 score',
-          urlBackground: '../res/images/background.jpg',
-        },
-        {id: 2, name: 'Mobile', note: '9 score'},
-        {id: 2, name: 'Web', note: '10 score'},
-        {id: 2, name: 'Desktop', note: '9 score'},
+        // {
+        //   id: 1,
+        //   name: 'Game',
+        //   note: '10 score',
+        //   urlBackground: '../res/images/background.jpg',
+        // },
+        // {id: 2, name: 'Mobile', note: '9 score'},
+        // {id: 3, name: 'Web', note: '10 score'},
+        // {id: 4, name: 'desktop', note: '10 score'},
       ],
+      showAlert: false,
     };
+  }
+
+  componentDidMount() {
+    const subscriber = firestore()
+      .collection('Projects')
+      .onSnapshot(querySnapshot => {
+        const projects = [];
+
+        querySnapshot.forEach(documentSnapshot => {
+          projects.push({
+            ...documentSnapshot.data(),
+            id: documentSnapshot.id,
+          });
+        });
+
+        this.setState({
+          projects: projects,
+          loading: false
+        })
+      });
+
+    // Unsubscribe from events when no longer in use
+    return () => subscriber();
   }
 
   render() {
     const {navigation} = this.props;
+
+    const componentBody = () => {
+      if (this.state.loading)
+        return (
+          <View style={styles.containerView}>
+            <ActivityIndicator color={colors.Primary} size="large" />
+          </View>
+        );
+      if (this.state.projects.length == 0)
+        return (
+          <View style={styles.containerView}>
+            <Icon name="cube" style={styles.iconEmpty} />
+            <Text note>You have no projects</Text>
+            <Text note>Tap + to create a new one</Text>
+          </View>
+        );
+      return (
+        <FlatList
+          data={this.state.projects}
+          contentContainerStyle={styles.container}
+          numColumns={2}
+          renderItem={({item}) => (
+            <View style={styles.wrapper}>
+              <ProjectItem
+                project={item}
+                onPress={() => navigation.navigate('Project', {project: item})}
+              />
+            </View>
+          )}
+          keyExtractor={item => item.id}
+        />
+      );
+    };
+
     return (
       <Container style={{backgroundColor: colors.Background}}>
         <Header style={{backgroundColor: 'white'}} searchBar rounded>
@@ -53,21 +114,13 @@ export default class ListThumbnailExample extends Component {
         <View style={styles.titleView}>
           <Text style={styles.titleText}>My Projects</Text>
         </View>
-        <FlatList
-          data={this.state.projects}
-          contentContainerStyle={styles.container}
-          numColumns={2}
-          renderItem={({item}) => (
-            <View style={styles.wrapper}>
-              <ProjectItem
-                project={item}
-                onPress={() => navigation.navigate('Project', {project: item})}
-              />
-            </View>
-          )}
-          keyExtractor={item => item.id}
-        />
-        <Fab style={{backgroundColor: colors.Primary}}>
+        <AddProjectAlert screen={this} />
+        {componentBody()}
+        <Fab
+          style={{backgroundColor: colors.Primary}}
+          onPress={() => {
+            this.setState({showAlert: true});
+          }}>
           <Icon name="add" />
         </Fab>
       </Container>
@@ -81,7 +134,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   wrapper: {
-    flex: 1,
+    width: '50%',
     paddingHorizontal: 4,
   },
   titleView: {
@@ -90,7 +143,18 @@ const styles = StyleSheet.create({
   },
   titleText: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingTop: 10,
+    paddingBottom: 20,
     fontSize: 20,
+  },
+  iconEmpty: {
+    fontSize: 50,
+    padding: 10,
+    color: colors.Disable,
+  },
+  containerView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -34,7 +34,6 @@ class Board extends React.Component {
       x: 0,
       y: 0,
       movingMode: false,
-      columns: this.props.rowRepository.columns(),
     };
 
     this.panResponder = PanResponder.create({
@@ -60,16 +59,12 @@ class Board extends React.Component {
 
       if (this.x + gestureState.dx < 50 && gestureState.vx < 0) {
         this.scrollOffsetBoard -= 50;
-        this.scrollBoard.current
-          .getNode()
-          .scrollToOffset({offset: this.scrollOffsetBoard});
+        this.scrollBoard.scrollToOffset({offset: this.scrollOffsetBoard});
         this.props.rowRepository.updateColumnsLayoutAfterVisibilityChanged();
       }
       if (this.x + gestureState.dx + 50 > deviceWidth && gestureState.vx > 0) {
         this.scrollOffsetBoard += 50;
-        this.scrollBoard.current
-          .getNode()
-          .scrollToOffset({offset: this.scrollOffsetBoard});
+        this.scrollBoard.scrollToOffset({offset: this.scrollOffsetBoard});
         this.props.rowRepository.updateColumnsLayoutAfterVisibilityChanged();
       }
 
@@ -261,17 +256,8 @@ class Board extends React.Component {
     );
   }
 
-  renderColumnWrapper(data) {
-    const {renderRow} = this.props;
-    return (
-      <TaskWrapper {...data}>
-        {renderRow && data.item && renderRow(data.item.row())}
-      </TaskWrapper>
-    );
-  }
-
   render() {
-    const columnWrappers = ({item, index, drag, isActive}) => {
+    const columnWrappers = ({item, index}) => {
       const columnComponent = (
         <Column
           column={item}
@@ -291,24 +277,19 @@ class Board extends React.Component {
         item.data(),
         item.index(),
         columnComponent,
-        drag,
       );
     };
 
     return (
-      <View {...this.panResponder.panHandlers} style={{flex: 1, justifyContent:'center'}}>
+      <View {...this.panResponder.panHandlers} style={{flex: 1}}>
         {this.movingTask()}
-        <DraggableFlatList
+        <FlatList
           horizontal
-          data={this.state.columns}
+          data={this.props.rowRepository.columns()}
           renderItem={columnWrappers}
           keyExtractor={item => item.id()}
-          onDragEnd={({data}) => {
-            this.setState({columns: data});
-            this.props.rowRepository.updateColumnsLayoutAfterVisibilityChanged();
-          }}
           style={this.props.style}
-          onRef={ref => (this.scrollBoard = ref)}
+          ref={ref => (this.scrollBoard = ref)}
           contentContainerStyle={this.props.contentContainerStyle}
           scrollEnabled={!this.state.movingMode}
           onScrollEndDrag={this.onScrollEnd.bind(this)}
