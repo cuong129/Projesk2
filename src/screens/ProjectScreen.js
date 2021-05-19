@@ -24,14 +24,15 @@ import ListTaskItem from '../components/ListTaskItem';
 import TaskItem from '../components/TaskItem';
 import {Board, RowRepository} from '../components/Board/index';
 import {ListTaskAlert} from '../components/AlertCustom/index';
+import {auth, firestore} from '../firebase';
 
 export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      showAddList: false,
-    };
+    this.Project = this.props.route.params.Project;
+    this.idProject = this.Project.id;
+
     const data = [
       {
         id: 1,
@@ -57,8 +58,41 @@ export default class ProjectScreen extends Component {
       },
     ];
 
-    (this.rowRepository = new RowRepository(data)),
-      (this.project = this.props.route.params.project);
+    this.state = {
+      showAddList: false,
+      project: this.Project,
+      rowRepository: new RowRepository([]),
+    };
+  }
+
+  componentDidMount() {
+    this.subscriber = firestore()
+      .collection('Projects')
+      .doc(this.idProject)
+      .onSnapshot(querySnapshot => {
+        if (!querySnapshot.exists) {
+          firestore().collection('Users')
+            .doc(auth().currentUser.uid)
+            .update({
+              myProjects: firestore.FieldValue.arrayRemove(this.idProject),
+            });
+          this.props.navigation.goBack();
+          return;
+        }
+
+        const data = querySnapshot.data();
+        this.setState({
+          project: data,
+          rowRepository: new RowRepository(data.tasks),
+        });
+      });
+
+    // Unsubscribe from events when no longer in use
+    return () => this.subscriber();
+  }
+
+  componentWillUnmount() {
+    this.subscriber();
   }
 
   SetDefaultStyleImage = url => {
@@ -80,12 +114,13 @@ export default class ProjectScreen extends Component {
   }
 
   render() {
+    const {project, rowRepository} = this.state;
     return (
       <ImageBackground
-        source={this.SetDefaultImage(this.project.urlBackground)}
+        source={this.SetDefaultImage(project.urlBackground)}
         style={{flex: 1}}
         imageStyle={styles.image}
-        resizeMode={this.SetDefaultStyleImage(this.project.urlBackground)}>
+        resizeMode={this.SetDefaultStyleImage(project.urlBackground)}>
         <Container style={styles.container}>
           <Header style={{backgroundColor: 'transparent'}}>
             <Left>
@@ -96,7 +131,7 @@ export default class ProjectScreen extends Component {
               </Button>
             </Left>
             <Body>
-              <Title>{this.project.name}</Title>
+              <Title>{project.name}</Title>
             </Body>
             <Right>
               <Button transparent onPress={this.AddList.bind(this)}>
@@ -110,7 +145,7 @@ export default class ProjectScreen extends Component {
           {this.showAlert()}
           <Board
             contentContainerStyle={styles.containerListTask}
-            rowRepository={this.rowRepository}
+            rowRepository={rowRepository}
             renderRow={this.renderRow.bind(this)}
             renderColumnWrapper={this.renderColumnWrapper.bind(this)}
             open={this.onOpen.bind(this)}

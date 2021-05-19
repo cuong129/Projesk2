@@ -25,7 +25,7 @@ export default class CardListExample extends Component {
   render() {
     return (
       <View style={styles.cardListTask}>
-        <AddTaskAlert screen={this} />
+        {/* <AddTaskAlert screen={this} /> */}
         <View
           backgroundColor={this.state.columnTask.color}
           style={styles.cardItemTop}>

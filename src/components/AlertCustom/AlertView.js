@@ -4,7 +4,6 @@ import {Button} from 'native-base';
 import {colors} from '../../res/colors';
 
 const AlertView = ({
-  show,
   title,
   positveButtonText,
   positveButtonPress,
@@ -13,7 +12,7 @@ const AlertView = ({
 }) => {
 
   return (
-    <Modal animationType="fade" transparent={true} visible={show}>
+    <Modal animationType="fade" transparent={true}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <View>

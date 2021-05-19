@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import AlertView from './AlertView';
 import {Input, Item, Icon} from 'native-base';
 import {View} from 'react-native';
+import {firestore} from '../../firebase';
+import {ColorBoard} from '../../res/colors';
 
 const AddProjectAlert = ({screen}) => {
   const [isEmptyInput, setIsEmptyInput] = useState(0);
@@ -10,8 +12,8 @@ const AddProjectAlert = ({screen}) => {
   const [inputNote, setInputNote] = useState('');
 
   const onTextChange = text => {
-    setInputName(text);
-    if (!text || text === '') {
+    setInputName(text.trim());
+    if (!text || text.trim() === '') {
       if (isEmptyInput == -1) return;
       setIconInput('close-circle');
       setIsEmptyInput(-1);
@@ -25,16 +27,37 @@ const AddProjectAlert = ({screen}) => {
   const AddProject = () => {
     if (isEmptyInput == 0) {
       setIsEmptyInput(-1);
-      setIconInput('close-circle')
+      setIconInput('close-circle');
       return;
     }
     if (isEmptyInput == 1) {
-      let newProjects = [
-        ...screen.state.projects,
-        {id: 5, name: inputName, note: inputNote},
-      ];
+      let newProject = {
+        name: inputName,
+        note: inputNote,
+        photoURL: null,
+        tasks: [
+          {id: 0, name: 'To Do', color: ColorBoard[6], rows: []},
+          {id: 1, name: 'Doing', color: ColorBoard[2], rows: []},
+          {id: 2, name: 'Done', color: ColorBoard[4], rows: []},
+        ],
+      };
+
+      firestore()
+        .collection('Projects')
+        .add(newProject)
+        .then(querySnapshot => {
+          let MyProjectIds = Array.from(
+            screen.state.projects,
+            element => element.id,
+          );
+          MyProjectIds.push(querySnapshot.id);
+
+          firestore().collection('Users').doc(screen.currentUser.uid).update({
+            myProjects: MyProjectIds,
+          });
+        });
+
       screen.setState({
-        projects: newProjects,
         showAlert: false,
       });
     }
@@ -42,7 +65,6 @@ const AddProjectAlert = ({screen}) => {
 
   return (
     <AlertView
-      show={screen.state.showAlert}
       title="Create New Project"
       positveButtonText="CREATE"
       positveButtonPress={AddProject}

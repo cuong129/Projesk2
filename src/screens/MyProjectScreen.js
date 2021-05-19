@@ -25,42 +25,75 @@ export default class ListThumbnailExample extends Component {
     super(props);
     this.state = {
       loading: true,
-      projects: [
-        // {
-        //   id: 1,
-        //   name: 'Game',
-        //   note: '10 score',
-        //   urlBackground: '../res/images/background.jpg',
-        // },
-        // {id: 2, name: 'Mobile', note: '9 score'},
-        // {id: 3, name: 'Web', note: '10 score'},
-        // {id: 4, name: 'desktop', note: '10 score'},
-      ],
+      projects: [],
       showAlert: false,
     };
+    this.currentUser = auth().currentUser;
   }
 
   componentDidMount() {
+    this.setState({loading: true});
     const subscriber = firestore()
-      .collection('Projects')
+      .collection('Users')
+      .doc(this.currentUser.uid)
       .onSnapshot(querySnapshot => {
         const projects = [];
+        const MyProjectIdCopy = [];
+        const MyProjectIds = querySnapshot.get('myProjects');
 
-        querySnapshot.forEach(documentSnapshot => {
-          projects.push({
-            ...documentSnapshot.data(),
-            id: documentSnapshot.id,
-          });
-        });
-
-        this.setState({
-          projects: projects,
-          loading: false
-        })
+        this.getAllInfoProject(MyProjectIds, 0, projects, MyProjectIdCopy);
       });
 
     // Unsubscribe from events when no longer in use
     return () => subscriber();
+  }
+
+  getAllInfoProject(MyProjectIds, index, projects, MyProjectIdCopy) {
+    if (!MyProjectIds) {
+      this.setState({
+        projects: projects,
+        loading: false,
+      });
+      return;
+    }
+    if (index == MyProjectIds.length) {
+      // update my id projects if have change
+      if (MyProjectIdCopy.length != MyProjectIds.length)
+        firestore()
+          .collection('Users')
+          .doc(this.currentUser.uid)
+          .update({myProjects: MyProjectIdCopy});
+
+      this.setState({
+        projects: projects,
+        loading: false,
+      });
+      return;
+    }
+    firestore()
+      .collection('Projects')
+      .doc(MyProjectIds[index])
+      .get()
+      .then(result => {
+        if (result.exists) {
+          project = {
+            id: result.id,
+            name: result.get('name'),
+            note: result.get('note'),
+            photoURL: result.get('photoURL'),
+          };
+          projects.push(project);
+          MyProjectIdCopy.push(MyProjectIds[index]);
+        }
+      })
+      .finally(() => {
+        this.getAllInfoProject(
+          MyProjectIds,
+          index + 1,
+          projects,
+          MyProjectIdCopy,
+        );
+      });
   }
 
   render() {
@@ -90,13 +123,17 @@ export default class ListThumbnailExample extends Component {
             <View style={styles.wrapper}>
               <ProjectItem
                 project={item}
-                onPress={() => navigation.navigate('Project', {project: item})}
+                onPress={() => navigation.navigate('Project', {Project: item})}
               />
             </View>
           )}
           keyExtractor={item => item.id}
         />
       );
+    };
+
+    const showAlert = () => {
+      if (this.state.showAlert) return <AddProjectAlert screen={this} />;
     };
 
     return (
@@ -114,7 +151,7 @@ export default class ListThumbnailExample extends Component {
         <View style={styles.titleView}>
           <Text style={styles.titleText}>My Projects</Text>
         </View>
-        <AddProjectAlert screen={this} />
+        {showAlert()}
         {componentBody()}
         <Fab
           style={{backgroundColor: colors.Primary}}

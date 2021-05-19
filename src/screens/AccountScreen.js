@@ -28,7 +28,7 @@ export default class ListIconExample extends Component {
   static contextType = AuthContext;
   constructor(props) {
     super(props);
-
+    
     this.currentUser = auth().currentUser;
   }
 

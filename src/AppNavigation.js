@@ -95,25 +95,22 @@ export default function AppNavigation({navigation}) {
 
           auth()
             .signInWithCredential(googleCredential)
-            .then(async () => {
-              const user = userInfo.user;
-              const userExist = await firestore()
+            .then(async (querySnapshot) => {
+              const user = querySnapshot.user;
+              await firestore()
                 .collection('Users')
-                .doc(user.id)
+                .doc(user.uid)
                 .get()
-                .then(() => {
-                  if (!userExist) {
-                    firestore().collection('Users').doc(user.id).set({
-                      name: user.name,
+                .then(querySnapshot => {
+                  if (!querySnapshot.exists) {
+                    firestore().collection('Users').doc(user.uid).set({
+                      name: user.displayName,
                       email: user.email,
-                      photoURL: user.photo,
+                      photoURL: user.photoURL,
                     });
                   }
                 })
-                .finally(() => {
-                  data.setState({loading: false});
-                  dispatch({type: 'SIGN_IN', token: userInfo.idToken});
-                });
+              dispatch({type: 'SIGN_IN', token: userInfo.idToken});
             });
         } catch (error) {
           console.log(error);
