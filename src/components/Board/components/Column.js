@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { View, FlatList, ScrollView } from 'react-native';
+import {View, FlatList, ScrollView} from 'react-native';
 
 class Column extends React.Component {
   constructor(props) {
@@ -15,12 +15,12 @@ class Column extends React.Component {
     this.props.rowRepository.addListener(
       this.props.column.id(),
       'reload',
-      this.reload.bind(this)
+      this.reload.bind(this),
     );
   }
 
   reload() {
-    this.setState({ dataSource: this.data() });
+    this.setState({dataSource: this.data()});
   }
 
   data() {
@@ -54,7 +54,7 @@ class Column extends React.Component {
     return () => {
       this.props.rowRepository.updateItemWithLayout(
         this.props.column.id(),
-        item
+        item,
       );
     };
   }
@@ -67,7 +67,7 @@ class Column extends React.Component {
     this.props.rowRepository.updateColumnWithLayout(this.props.column.id());
   }
 
-  renderWrapperRow({ item }) {
+  renderWrapperRow({item}) {
     let props = {
       onLongPress: this.onLongPress(item),
       onPressOut: this.onPressOut(item),
@@ -77,7 +77,7 @@ class Column extends React.Component {
     };
     return (
       <View
-        ref={(ref) => this.setItemRef(item, ref)}
+        ref={ref => this.setItemRef(item, ref)}
         onLayout={this.updateItemWithLayout(item)}>
         {this.props.renderWrapperRow(props)}
       </View>
@@ -119,7 +119,7 @@ class Column extends React.Component {
   onContentSizeChange(_, contentHeight) {
     this.props.rowRepository.setContentHeight(
       this.props.column.id(),
-      contentHeight
+      contentHeight,
     );
   }
 
@@ -130,7 +130,7 @@ class Column extends React.Component {
   render() {
     return (
       <View
-        style={{ flex: 1 }}
+        style={{flex:1}}
         ref={this.setColumnRef.bind(this)}
         onLayout={this.updateColumnWithLayout.bind(this)}>
         <FlatList

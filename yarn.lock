@@ -1309,6 +1309,11 @@
   "resolved" "https://registry.npmjs.org/@react-native-firebase/auth/-/auth-11.2.0.tgz"
   "version" "11.2.0"
 
+"@react-native-firebase/firestore@^11.5.0":
+  version "11.5.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-11.5.0.tgz#3e0349891cb908fe7d24f9b3c1315ff6ffd8e3d6"
+  integrity sha512-yZv5bxTNICckRtEucb9SSX0slXN4CbN5ZT7tFh9Pm1CTEtU2jVcSC7qhG5l5SqmcoMOBnFavm8Mbti6BY5/1cg==
+
 "@react-native-google-signin/google-signin@^6.0.0":
   "integrity" "sha512-xmrrG2muhwmoPy9AdfP+ceLBZtnrXkZwgN/jR5u3xOHadyerJfvD76w2BSmm7zeoiMB1wwSkZkzFSa9+i1BdKA=="
   "resolved" "https://registry.npmjs.org/@react-native-google-signin/google-signin/-/google-signin-6.0.0.tgz"

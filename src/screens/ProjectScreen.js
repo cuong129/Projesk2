@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, useState} from 'react';
 import {
   Container,
   Header,
@@ -8,9 +8,6 @@ import {
   Button,
   Icon,
   Title,
-  Content,
-  Card,
-  Text,
 } from 'native-base';
 import {
   ImageBackground,
@@ -20,23 +17,27 @@ import {
   StyleSheet,
   View,
   FlatList,
-  TouchableOpacity,
-  Dimensions
+  TextInput,
 } from 'react-native';
 import {colors} from '../res/colors';
 import ListTaskItem from '../components/ListTaskItem';
 import TaskItem from '../components/TaskItem';
 import {Board, RowRepository} from '../components/Board/index';
-
-const deviceHeight = Dimensions.get('window').height;
+import {ListTaskAlert} from '../components/AlertCustom/index';
+import {auth, firestore} from '../firebase';
 
 export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
+
+    this.project = this.props.route.params.project;
+    this.idProject = this.project.id;
+
     const data = [
       {
         id: 1,
         name: 'To do',
+        color: '#DA3553',
         rows: [
           {id: 1, name: 'Map'},
           {id: 2, name: 'Grid'},
@@ -46,57 +47,102 @@ export default class ProjectScreen extends Component {
       {
         id: 2,
         name: 'Done',
+        color: '#01A5F4',
         rows: [{id: 3, name: 'Boss'}],
       },
       {
         id: 3,
         name: 'Doing',
+        color: '#FFD800',
         rows: [{id: 5, name: 'collision'}],
       },
     ];
 
-    this.state = {rowRepository: new RowRepository(data)};
-    this.project = this.props.route.params.project;
+    this.state = {
+      showAddList: false,
+      project: this.project,
+      rowRepository: new RowRepository([]),
+    };
   }
 
-  SetDefaultStyleImage = url => {
-    if (url == null) return 'center';
-    return 'cover';
+  componentDidMount() {
+    this.subscriber = firestore()
+      .collection('Projects')
+      .doc(this.idProject)
+      .onSnapshot(querySnapshot => {
+        if (!querySnapshot.exists) {
+          firestore()
+            .collection('Users')
+            .doc(auth().currentUser.uid)
+            .update({
+              myProjects: firestore.FieldValue.arrayRemove(this.idProject),
+            });
+          const navigation = this.props.navigation;
+          navigation.popToTop();
+          navigation.goBack();
+          return;
+        }
+
+        const data = querySnapshot.data();
+        data.tasks.forEach((element, index) => {
+          element.id = index;
+        });
+        this.setState({
+          project: data,
+          rowRepository: new RowRepository(data.tasks),
+        });
+      });
+
+    // Unsubscribe from events when no longer in use
+    return () => this.subscriber();
+  }
+
+  componentWillUnmount() {
+    this.subscriber();
+  }
+
+  AddList = () => {
+    this.setState({showAddList: true});
   };
 
-  SetDefaultImage = url => {
-    if (url == null) return require('../res/images/ic_app.png');
-    return require('../res/images/background.jpg');
-  };
+  showAlert() {
+    if (this.state.showAddList) return <ListTaskAlert screen={this} />;
+  }
 
   render() {
+    const {project, rowRepository} = this.state;
+    const {source, resizeMode} = this.props.route.params;
+    const {navigation} = this.props;
+
     return (
       <ImageBackground
-        source={this.SetDefaultImage(this.project.urlBackground)}
+        source={source}
         style={{flex: 1}}
         imageStyle={styles.image}
-        resizeMode={this.SetDefaultStyleImage(this.project.urlBackground)}>
+        resizeMode={resizeMode}>
         <Container style={styles.container}>
           <Header style={{backgroundColor: 'transparent'}}>
             <Left>
-              <Button
-                transparent
-                onPress={() => this.props.navigation.goBack()}>
+              <Button transparent onPress={() => navigation.goBack()}>
                 <Icon name="arrow-back" />
               </Button>
             </Left>
             <Body>
-              <Title>{this.project.name}</Title>
+              <Title>{project.name}</Title>
             </Body>
             <Right>
+              <Button transparent onPress={this.AddList.bind(this)}>
+                <Icon name="add-outline" />
+              </Button>
               <Button transparent>
                 <Icon name="ellipsis-vertical" />
               </Button>
             </Right>
           </Header>
+          {this.showAlert()}
           <Board
             contentContainerStyle={styles.containerListTask}
-            rowRepository={this.state.rowRepository}
+            rowRepository={rowRepository}
             renderRow={this.renderRow.bind(this)}
             renderColumnWrapper={this.renderColumnWrapper.bind(this)}
             open={this.onOpen.bind(this)}
@@ -120,16 +166,16 @@ export default class ProjectScreen extends Component {
     );
   }
 
-  renderColumnWrapper(column, index, columnComponent, drag) {
+  renderColumnWrapper(column, index, columnComponent) {
     return (
-      <TouchableOpacity style={styles.itemListTask} onLongPress={drag} activeOpacity={0.8}>
+      <View style={styles.itemListTask}>
         <ListTaskItem columnTask={column} component={columnComponent} />
-      </TouchableOpacity>
+      </View>
     );
   }
 
   onOpen(item) {
-    
+    this.props.navigation.navigate('Task', {task: item});
   }
 
   onDragEnd(srcColumnId, destColumnId, item) {}
@@ -146,11 +192,13 @@ const styles = StyleSheet.create({
   },
   itemListTask: {
     margin: 10,
+    marginBottom: 20,
   },
   containerListTask: {
     paddingHorizontal: 10,
   },
   cardTask: {
     width: 280,
+    alignSelf: 'center',
   },
 });
