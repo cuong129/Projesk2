@@ -3,31 +3,21 @@ import {Image, TouchableOpacity} from 'react-native';
 import {Card, CardItem, Text, Left, Body} from 'native-base';
 import {colors} from '../res/colors';
 
-SetDefaultStyleImage = url => {
-  if (url == null) return 'center';
-  return 'cover';
-};
-
-SetDefaultImage = url => {
-  if (url == null) return require('../res/images/ic_app.png');
-  return require('../res/images/background.jpg');
-};
-
 export default function ProjectItem(props) {
-  const {project, onPress} = props;
+  const {project, onPress, SetSourceImage, SetResizeModeImage} = props;
   return (
     <Card>
       <TouchableOpacity activeOpacity={0.5} onPress={onPress}>
         <CardItem cardBody>
           <Image
-            source={SetDefaultImage(project.urlBackground)}
+            source={SetSourceImage}
             style={{
               height: 150,
               width: null,
               flex: 1,
               backgroundColor: colors.Primary,
             }}
-            resizeMode={SetDefaultStyleImage(project.urlBackground)}
+            resizeMode={SetResizeModeImage}
           />
         </CardItem>
         <CardItem>

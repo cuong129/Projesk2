@@ -30,8 +30,8 @@ export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
 
-    this.Project = this.props.route.params.Project;
-    this.idProject = this.Project.id;
+    this.project = this.props.route.params.project;
+    this.idProject = this.project.id;
 
     const data = [
       {
@@ -60,7 +60,7 @@ export default class ProjectScreen extends Component {
 
     this.state = {
       showAddList: false,
-      project: this.Project,
+      project: this.project,
       rowRepository: new RowRepository([]),
     };
   }
@@ -71,16 +71,22 @@ export default class ProjectScreen extends Component {
       .doc(this.idProject)
       .onSnapshot(querySnapshot => {
         if (!querySnapshot.exists) {
-          firestore().collection('Users')
+          firestore()
+            .collection('Users')
             .doc(auth().currentUser.uid)
             .update({
               myProjects: firestore.FieldValue.arrayRemove(this.idProject),
             });
-          this.props.navigation.goBack();
+          const navigation = this.props.navigation;
+          navigation.popToTop();
+          navigation.goBack();
           return;
         }
 
         const data = querySnapshot.data();
+        data.tasks.forEach((element, index) => {
+          element.id = index;
+        });
         this.setState({
           project: data,
           rowRepository: new RowRepository(data.tasks),
@@ -95,16 +101,6 @@ export default class ProjectScreen extends Component {
     this.subscriber();
   }
 
-  SetDefaultStyleImage = url => {
-    if (url == null) return 'center';
-    return 'cover';
-  };
-
-  SetDefaultImage = url => {
-    if (url == null) return require('../res/images/ic_app.png');
-    return require('../res/images/background.jpg');
-  };
-
   AddList = () => {
     this.setState({showAddList: true});
   };
@@ -115,18 +111,19 @@ export default class ProjectScreen extends Component {
 
   render() {
     const {project, rowRepository} = this.state;
+    const {source, resizeMode} = this.props.route.params;
+    const {navigation} = this.props;
+
     return (
       <ImageBackground
-        source={this.SetDefaultImage(project.urlBackground)}
+        source={source}
         style={{flex: 1}}
         imageStyle={styles.image}
-        resizeMode={this.SetDefaultStyleImage(project.urlBackground)}>
+        resizeMode={resizeMode}>
         <Container style={styles.container}>
           <Header style={{backgroundColor: 'transparent'}}>
             <Left>
-              <Button
-                transparent
-                onPress={() => this.props.navigation.goBack()}>
+              <Button transparent onPress={() => navigation.goBack()}>
                 <Icon name="arrow-back" />
               </Button>
             </Left>
@@ -177,7 +174,9 @@ export default class ProjectScreen extends Component {
     );
   }
 
-  onOpen(item) {}
+  onOpen(item) {
+    this.props.navigation.navigate('Task', {task: item});
+  }
 
   onDragEnd(srcColumnId, destColumnId, item) {}
 }

@@ -20,7 +20,7 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import {AddProjectAlert} from '../components/AlertCustom/index';
 import {auth, firestore} from '../firebase';
 
-export default class ListThumbnailExample extends Component {
+export default class MyProjectScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -119,14 +119,34 @@ export default class ListThumbnailExample extends Component {
           data={this.state.projects}
           contentContainerStyle={styles.container}
           numColumns={2}
-          renderItem={({item}) => (
-            <View style={styles.wrapper}>
-              <ProjectItem
-                project={item}
-                onPress={() => navigation.navigate('Project', {Project: item})}
-              />
-            </View>
-          )}
+          renderItem={({item}) => {
+            const url = item.photoURL;
+            const source =
+              url == null || url === ''
+                ? require('../res/images/ic_app.png')
+                : {uri: url};
+            const resizeMode = url == null || url === '' ? 'center' : 'cover';
+
+            return (
+              <View style={styles.wrapper}>
+                <ProjectItem
+                  SetSourceImage={source}
+                  SetResizeModeImage={resizeMode}
+                  project={item}
+                  onPress={() =>
+                    navigation.navigate('Project', {
+                      screen: 'ProjectMain',
+                      params: {
+                        project: item,
+                        source: source,
+                        resizeMode: resizeMode,
+                      },
+                    })
+                  }
+                />
+              </View>
+            );
+          }}
           keyExtractor={item => item.id}
         />
       );

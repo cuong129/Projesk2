@@ -24,6 +24,10 @@ import {
 import {AuthContext} from './context';
 
 const Stack = createStackNavigator();
+const Home = createStackNavigator();
+const Project = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
 export default function AppNavigation({navigation}) {
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
@@ -95,7 +99,7 @@ export default function AppNavigation({navigation}) {
 
           auth()
             .signInWithCredential(googleCredential)
-            .then(async (querySnapshot) => {
+            .then(async querySnapshot => {
               const user = querySnapshot.user;
               await firestore()
                 .collection('Users')
@@ -109,7 +113,7 @@ export default function AppNavigation({navigation}) {
                       photoURL: user.photoURL,
                     });
                   }
-                })
+                });
               dispatch({type: 'SIGN_IN', token: userInfo.idToken});
             });
         } catch (error) {
@@ -173,18 +177,24 @@ export default function AppNavigation({navigation}) {
   );
 }
 
-const Home = createStackNavigator();
 function HomeScreen() {
   return (
     <Home.Navigator headerMode="none">
       <Home.Screen name="Main" component={MainScreen} />
-      <Home.Screen name="Task" component={screen.TaskScreen} />
-      <Home.Screen name="Project" component={screen.ProjectScreen} />
+      <Home.Screen name="Project" component={ProjectScreen} />
     </Home.Navigator>
   );
 }
 
-const Tab = createBottomTabNavigator();
+function ProjectScreen() {
+  return (
+    <Project.Navigator headerMode="none">
+      <Project.Screen name="ProjectMain" component={screen.ProjectScreen} />
+      <Project.Screen name="Task" component={screen.TaskScreen} />
+    </Project.Navigator>
+  );
+}
+
 function MainScreen() {
   return (
     <Tab.Navigator

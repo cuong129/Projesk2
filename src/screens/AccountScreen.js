@@ -24,7 +24,7 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import {AuthContext} from '../context';
 import {auth} from '../firebase';
 
-export default class ListIconExample extends Component {
+export default class AccountScreen extends Component {
   static contextType = AuthContext;
   constructor(props) {
     super(props);
