@@ -67,7 +67,7 @@ function MainScreen() {
                   <Text>project</Text>
                 </Button>
                 <Button
-                  vertica
+                  vertical
                   active={props.state.index === 2}
                   onPress={() => props.navigation.navigate('MyTask')}>
                   <Icon name="checkmark-done-circle" />

@@ -23,7 +23,7 @@ import {
   TouchableOpacity,
   Dimensions
 } from 'react-native';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 import ListTaskItem from '../components/ListTaskItem';
 import TaskItem from '../components/TaskItem';
 import {Board, RowRepository} from '../components/Board/index';
@@ -128,7 +128,9 @@ export default class ProjectScreen extends Component {
     );
   }
 
-  onOpen(item) {}
+  onOpen(item) {
+    
+  }
 
   onDragEnd(srcColumnId, destColumnId, item) {}
 }

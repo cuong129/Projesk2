@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "^3.5.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-firebase/app": "^11.2.0",
     "@react-native-firebase/auth": "^11.2.0",
@@ -23,9 +24,12 @@
     "react-native": "0.64.0",
     "react-native-draggable-flatlist": "^2.6.1",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-get-random-values": "^1.7.0",
+    "react-native-raw-bottom-sheet": "^2.2.0",
     "react-native-reanimated": "^2.1.0",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.1.1",
+    "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^7.1.0",
     "react-timeout": "^2.0.1",
     "underscore": "^1.13.1"

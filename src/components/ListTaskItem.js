@@ -12,7 +12,7 @@ import {
   Body,
 } from 'native-base';
 import {FlatList, StyleSheet, View, Text, ScrollView} from 'react-native';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 
 export default class CardListExample extends Component {
   constructor(props) {

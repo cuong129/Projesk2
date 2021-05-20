@@ -1,7 +1,7 @@
 import React from 'react';
 import {Image, TouchableOpacity} from 'react-native';
 import {Card, CardItem, Text, Left, Body} from 'native-base';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 
 SetDefaultStyleImage = url => {
   if (url == null) return 'center';

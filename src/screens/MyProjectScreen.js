@@ -12,7 +12,7 @@ import {
   Fab,
 } from 'native-base';
 import {StyleSheet, FlatList, View} from 'react-native';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 import ProjectItem from '../components/ProjectItem';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';

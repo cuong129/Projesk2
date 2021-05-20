@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Header, Content, Form, Item, Input, Label, Button, Text, Title, Left, Body, Icon } from 'native-base';
 import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
-import colors from 'res/colors'
+import {colors} from 'res/colors'
 import images from 'res/images'
 import {GoogleSignin, GoogleSigninButton, statusCodes} from '@react-native-google-signin/google-signin'; 
 import auth from '@react-native-firebase/auth';

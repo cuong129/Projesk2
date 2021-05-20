@@ -19,7 +19,7 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import colors from '../res/colors';
+import {colors} from '../res/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 export default class ListIconExample extends Component {
