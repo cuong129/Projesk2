@@ -1296,10 +1296,10 @@
   "resolved" "https://registry.npmjs.org/@react-native-community/masked-view/-/masked-view-0.1.10.tgz"
   "version" "0.1.10"
 
-"@react-native-firebase/app@^11.2.0":
-  "integrity" "sha512-TLrttjy6h5rhmRqnKFe67GNbYeB1VZphH5Gm+pYJzfIbMsh/m6q2Au1D4jmLnfjpqXAaTtAhetnODyT1TH/LzQ=="
-  "resolved" "https://registry.npmjs.org/@react-native-firebase/app/-/app-11.2.0.tgz"
-  "version" "11.2.0"
+"@react-native-firebase/app@^11.2.0", "@react-native-firebase/app@11.5.0":
+  "integrity" "sha512-Jz5CBhqkybxHjTFr5V0K+Jq2YivzPbu9exSze61/z1zSaIfBhR4G38wmHk44VWAl+PEX8GaYy9yfT69tLiCERA=="
+  "resolved" "https://registry.npmjs.org/@react-native-firebase/app/-/app-11.5.0.tgz"
+  "version" "11.5.0"
   dependencies:
     "opencollective-postinstall" "^2.0.1"
     "superstruct" "^0.6.2"
@@ -1310,9 +1310,9 @@
   "version" "11.2.0"
 
 "@react-native-firebase/firestore@^11.5.0":
-  version "11.5.0"
-  resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-11.5.0.tgz#3e0349891cb908fe7d24f9b3c1315ff6ffd8e3d6"
-  integrity sha512-yZv5bxTNICckRtEucb9SSX0slXN4CbN5ZT7tFh9Pm1CTEtU2jVcSC7qhG5l5SqmcoMOBnFavm8Mbti6BY5/1cg==
+  "integrity" "sha512-yZv5bxTNICckRtEucb9SSX0slXN4CbN5ZT7tFh9Pm1CTEtU2jVcSC7qhG5l5SqmcoMOBnFavm8Mbti6BY5/1cg=="
+  "resolved" "https://registry.npmjs.org/@react-native-firebase/firestore/-/firestore-11.5.0.tgz"
+  "version" "11.5.0"
 
 "@react-native-google-signin/google-signin@^6.0.0":
   "integrity" "sha512-xmrrG2muhwmoPy9AdfP+ceLBZtnrXkZwgN/jR5u3xOHadyerJfvD76w2BSmm7zeoiMB1wwSkZkzFSa9+i1BdKA=="
@@ -6643,7 +6643,7 @@
     "whatwg-fetch" "^3.0.0"
     "ws" "^6.1.4"
 
-"react-native@^0.64.0", "react-native@>=0.56", "react-native@>=0.60", "react-native@>=0.62.0", "react-native@0.64.0":
+"react-native@*", "react-native@^0.64.0", "react-native@>=0.56", "react-native@>=0.60", "react-native@>=0.62.0", "react-native@0.64.0":
   "integrity" "sha512-8dhSHBthgGwAjU+OjqUEA49229ThPMQH7URH0u8L0xoQFCnZO2sZ9Wc6KcbxI0x9KSmjCMFFZqRe3w3QsRv64g=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.64.0.tgz"
   "version" "0.64.0"
@@ -6720,7 +6720,7 @@
     "raf" "^3.1.0"
     "tween-functions" "^1.0.1"
 
-"react@>=16.8.3", "react@17.0.1":
+"react@*", "react@>=16.8.3", "react@17.0.1":
   "integrity" "sha512-lG9c9UuMHdcAexXtigOZLX8exLWkW0Ku29qPRU8uhF2R9BN96dLCt0psvzPLlHc5OWkgymP3qwTRgbnw5BKx3w=="
   "resolved" "https://registry.npmjs.org/react/-/react-17.0.1.tgz"
   "version" "17.0.1"
