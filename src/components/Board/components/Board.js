@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 const deviceWidth = Dimensions.get('window').width;
+const CARD_WIDTH = 280;
 
 class Board extends React.Component {
   MAX_RANGE = 100;
@@ -57,12 +58,16 @@ class Board extends React.Component {
       this.x = evt.nativeEvent.pageX;
       this.y = evt.nativeEvent.pageY;
 
-      if (this.x + gestureState.dx < 50 && gestureState.vx < 0) {
+      if (this.state.startingX + gestureState.dx < -50 && gestureState.vx < 0) {
         this.scrollOffsetBoard -= 50;
         this.scrollBoard.scrollToOffset({offset: this.scrollOffsetBoard});
         this.props.rowRepository.updateColumnsLayoutAfterVisibilityChanged();
       }
-      if (this.x + gestureState.dx + 50 > deviceWidth && gestureState.vx > 0) {
+      if (
+        this.state.startingX + gestureState.dx + CARD_WIDTH - 50 >
+          deviceWidth &&
+        gestureState.vx > 0
+      ) {
         this.scrollOffsetBoard += 50;
         this.scrollBoard.scrollToOffset({offset: this.scrollOffsetBoard});
         this.props.rowRepository.updateColumnsLayoutAfterVisibilityChanged();
@@ -159,8 +164,8 @@ class Board extends React.Component {
     this.rotateTo(0);
   }
 
-  open(row) {
-    this.props.open(row);
+  open(row, columnIndex, index) {
+    this.props.open(row, columnIndex, index);
   }
 
   onLongPress(columnId, item, columnCallback) {
@@ -209,7 +214,7 @@ class Board extends React.Component {
       }
 
       if (!this.state.movingMode) {
-        this.open(item.row());
+        this.open(item.row(), item.columnIndex(), item.index());
       } else {
         this.endMoving();
       }

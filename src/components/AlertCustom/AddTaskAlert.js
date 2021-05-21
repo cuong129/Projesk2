@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import AlertView from './AlertView';
-import {Input, Item, Icon} from 'native-base';
+import {Input, Item, Icon, Text} from 'native-base';
 import {View} from 'react-native';
+import {firestore} from '../../firebase';
 
 const AddTaskAlert = ({screen}) => {
   const [isEmptyInput, setIsEmptyInput] = useState(0);
@@ -25,16 +26,19 @@ const AddTaskAlert = ({screen}) => {
   const AddTask = () => {
     if (isEmptyInput == 0) {
       setIsEmptyInput(-1);
-      setIconInput('close-circle')
+      setIconInput('close-circle');
       return;
     }
     if (isEmptyInput == 1) {
-      let newProjects = [
-        ...screen.state.projects,
-        {id: 5, name: inputName, note: inputNote},
-      ];
+      let newTask = {name: inputName, note: inputNote};
+
+      firestore()
+        .collection('Projects')
+        .doc(screen.props.idProject)
+        .update({
+          [('tasks/0.rows')]: firestore.FieldValue.arrayUnion(newTask),
+        });
       screen.setState({
-        projects: newProjects,
         showAlert: false,
       });
     }
@@ -49,6 +53,7 @@ const AddTaskAlert = ({screen}) => {
       cancelButtonPress={() => screen.setState({showAlert: false})}
       componentBody={
         <View>
+          <Text note>{'List ' + screen.props.columnTask.name}</Text>
           <Item error={isEmptyInput == -1} success={isEmptyInput == 1}>
             <Input placeholder="Name" onChangeText={onTextChange} />
             <Icon name={iconInput} />

@@ -3,7 +3,7 @@ import AlertView from './AlertView';
 import {Input, Item, Icon} from 'native-base';
 import {FlatList, View, Pressable} from 'react-native';
 import {ColorBoard} from '../../res/colors';
-import {RowRepository} from '../Board/index';
+import {firestore} from '../../firebase';
 
 const ListTaskAlert = ({screen}) => {
   const [isEmptyInput, setIsEmptyInput] = useState(0);
@@ -51,16 +51,19 @@ const ListTaskAlert = ({screen}) => {
       return;
     }
     if (isEmptyInput == 1) {
-      let newData = [
-        {
-          id: Math.floor(Math.random() * 10),
-          name: inputText,
-          color: ColorBoard[idSelectColor],
-          rows: [],
-        },
-      ];
+      let newList = {
+        name: inputText,
+        color: ColorBoard[idSelectColor],
+        rows: [],
+      };
 
-      screen.rowRepository = new RowRepository(newData);
+      firestore()
+        .collection('Projects')
+        .doc(screen.idProject)
+        .update({
+          tasks: firestore.FieldValue.arrayUnion(newList),
+        });
+
       screen.setState({
         showAddList: false,
       });

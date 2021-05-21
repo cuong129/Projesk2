@@ -60,7 +60,7 @@ const AddProjectAlert = ({screen}) => {
         note: inputNote,
         photoURL: inputPhotoURL,
         tasks: [
-          {name: 'To Do', color: ColorBoard[6], rows: [{id: 1, name: 'test'}]},
+          {name: 'To Do', color: ColorBoard[6], rows: [{name: 'test'}]},
           {name: 'Doing', color: ColorBoard[2], rows: []},
           {name: 'Done', color: ColorBoard[4], rows: []},
         ],
@@ -70,14 +70,8 @@ const AddProjectAlert = ({screen}) => {
         .collection('Projects')
         .add(newProject)
         .then(querySnapshot => {
-          let MyProjectIds = Array.from(
-            screen.state.projects,
-            element => element.id,
-          );
-          MyProjectIds.push(querySnapshot.id);
-
           firestore().collection('Users').doc(screen.currentUser.uid).update({
-            myProjects: MyProjectIds,
+            myProjects: firestore.FieldValue.arrayUnion(querySnapshot.id),
           });
         });
 

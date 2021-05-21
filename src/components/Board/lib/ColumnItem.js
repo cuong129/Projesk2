@@ -26,6 +26,7 @@ class ColumnItem {
       id: -2,
       index: 100000,
       columnId: this.id(),
+      columnIndex: this.index(),
       row: { id: -2 },
       hidden: true,
       locked: true,

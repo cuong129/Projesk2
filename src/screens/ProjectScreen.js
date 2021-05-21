@@ -84,9 +84,14 @@ export default class ProjectScreen extends Component {
         }
 
         const data = querySnapshot.data();
+        let indexRow = 0;
         data.tasks.forEach((element, index) => {
           element.id = index;
+          element.rows.forEach(elementRow => {
+            elementRow.id = indexRow++;
+          });
         });
+
         this.setState({
           project: data,
           rowRepository: new RowRepository(data.tasks),
@@ -169,13 +174,22 @@ export default class ProjectScreen extends Component {
   renderColumnWrapper(column, index, columnComponent) {
     return (
       <View style={styles.itemListTask}>
-        <ListTaskItem columnTask={column} component={columnComponent} />
+        <ListTaskItem
+          index={index}
+          columnTask={column}
+          component={columnComponent}
+          idProject={this.idProject}
+        />
       </View>
     );
   }
 
-  onOpen(item) {
-    this.props.navigation.navigate('Task', {task: item});
+  onOpen(item, columnIndex, index) {
+    this.props.navigation.navigate('Task', {
+      task: item,
+      columnIndex: columnIndex,
+      index: index,
+    });
   }
 
   onDragEnd(srcColumnId, destColumnId, item) {}
