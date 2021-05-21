@@ -7,7 +7,6 @@ import {AddTaskAlert} from '../components/AlertCustom/index';
 export default class ListTaskItem extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       showAlert: false,
     };

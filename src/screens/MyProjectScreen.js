@@ -11,6 +11,7 @@ import {
   Input,
   Fab,
 } from 'native-base';
+
 import {StyleSheet, FlatList, View, ActivityIndicator} from 'react-native';
 import {colors} from '../res/colors';
 import ProjectItem from '../components/ProjectItem';
