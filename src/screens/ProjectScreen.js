@@ -29,7 +29,6 @@ import {auth, firestore} from '../firebase';
 export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
-
     this.project = this.props.route.params.project;
     this.idProject = this.project.id;
 
@@ -62,6 +61,7 @@ export default class ProjectScreen extends Component {
       showAddList: false,
       project: this.project,
       rowRepository: new RowRepository([]),
+      tasks: [],
     };
   }
 
@@ -90,6 +90,7 @@ export default class ProjectScreen extends Component {
         this.setState({
           project: data,
           rowRepository: new RowRepository(data.tasks),
+          tasks: data.tasks,
         });
       });
 
@@ -175,7 +176,7 @@ export default class ProjectScreen extends Component {
   }
 
   onOpen(item) {
-    this.props.navigation.navigate('Task', {task: item});
+    this.props.navigation.navigate('Task', {task: item, idProject: this.idProject, tasks: this.state.tasks});
   }
 
   onDragEnd(srcColumnId, destColumnId, item) {}

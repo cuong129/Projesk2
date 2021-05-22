@@ -37,6 +37,7 @@ import RBSheet from "react-native-raw-bottom-sheet";
 
 import TagItem from '../components/TagItem';
 import TagColorBoard from '../components/TagColorBoard'
+import { firestore } from '../firebase';
 export default class TaskScreen extends Component {
   constructor(props) {
     super(props);
@@ -57,10 +58,11 @@ export default class TaskScreen extends Component {
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
+    console.log(this.props.route.params.tasks)
   }
   handleAddChecklistItem = () => {
     this.setState({
-      arrChecklist: [...this.state.arrChecklist, { id: uuidv4(), isChecked: false, name: this.state.ChecklistName }],
+      arrChecklist: [...this.state.arrChecklist, { id: uuidv4(), hasChecked: false, name: this.state.ChecklistName }],
       ChecklistName: '',
     });
   }
@@ -78,7 +80,7 @@ export default class TaskScreen extends Component {
   handlePressCheckbox = (id) => {
     const newArr = [...this.state.arrChecklist];
     const index = newArr.findIndex(item => item.id === id);
-    newArr[index] = Object.assign(newArr[index], { isChecked: !newArr[index].isChecked });
+    newArr[index] = Object.assign(newArr[index], { hasChecked: !newArr[index].hasChecked });
     this.setState({ arrChecklist: newArr });
   }
   //Date time picker
@@ -153,6 +155,25 @@ export default class TaskScreen extends Component {
     this.setState({ arrTaglist: newArr })
     this.RBSheetItem.close();
   }
+
+  handleUpdateTask = () => {
+    firestore()
+      .collection("Projects")
+      .doc(this.props.route.params.idProject)
+      .update({
+        tasks: this.updateTask(),
+      })
+    
+      console.log("123")
+  }
+  updateTask() {
+    var newTasks = this.props.route.params.tasks;
+    newTasks[0].rows[0].name = "423423432";
+    newTasks[0].rows[0].tag = this.state.arrTaglist;
+    console.log(newTasks)
+    return newTasks
+  }
+
   render() {
     return (
       <Container style={styles.container}>
@@ -168,8 +189,8 @@ export default class TaskScreen extends Component {
             <Title>Task name</Title>
           </Body>
           <Right>
-            <Button transparent>
-              <Icon name="ellipsis-vertical" />
+            <Button transparent onPress={this.handleUpdateTask}>
+              <Icon name="check" type='Feather' />
             </Button>
           </Right>
         </Header>
@@ -186,7 +207,7 @@ export default class TaskScreen extends Component {
           )}
           <Item style={styles.titleItem}>
             <Input
-              placeholder="123"
+              placeholder={this.props.route.params.task.name}
               style={{ fontSize: 24 }} />
           </Item>
           <Item style={styles.item}>
