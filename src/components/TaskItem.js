@@ -18,7 +18,7 @@ import {Image, StyleSheet, View, FlatList, ScrollView} from 'react-native';
 import {colors} from '../res/colors';
 import {wrap} from 'underscore';
 
-export default class CardImageExample extends Component {
+export default class TaskItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
