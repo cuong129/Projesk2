@@ -42,13 +42,14 @@ export default class TaskItem extends Component {
   }
 
   render() {
+    const {item} = this.props;
     return (
       <Card>
         <CardItem>
           <Left>
             <Body>
-              <Text>Task Name</Text>
-              <Text note>Note</Text>
+              <Text>{item.name}</Text>
+              <Text note>{item.note}</Text>
               <View style={{flexDirection: 'row'}}>
                 <Text style={{color: colors.Positive}}>03:24:00</Text>
                 <Text note> / 10:00:00</Text>

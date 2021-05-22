@@ -5,7 +5,9 @@ import TaskScreen from './TaskScreen'
 export default class NotifyScreen extends Component {
     render() {
         return (
-           <TaskScreen/>
+          <View>
+              <Text>Notify</Text>
+          </View>
         )
     }
 }

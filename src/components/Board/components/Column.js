@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {View, FlatList, ScrollView} from 'react-native';
+import {View, FlatList, ScrollView, Text} from 'react-native';
 
 class Column extends React.Component {
   constructor(props) {
@@ -12,6 +12,13 @@ class Column extends React.Component {
   }
 
   componentDidMount() {
+    this.props.rowRepository.addListener(
+      this.props.column.id(),
+      'reload',
+      this.reload.bind(this),
+    );
+  }
+  componentDidUpdate() {
     this.props.rowRepository.addListener(
       this.props.column.id(),
       'reload',
@@ -128,14 +135,23 @@ class Column extends React.Component {
   }
 
   render() {
+    const data = this.data();
+    const componentEmpty = () => {
+      if (data.length == 1) return this.props.renderColumnEmpty();
+      return null;
+    };
+
     return (
       <View
-        style={{flex:1}}
+        style={{flex: 1, justifyContent: 'center'}}
         ref={this.setColumnRef.bind(this)}
         onLayout={this.updateColumnWithLayout.bind(this)}>
+        <View style={{position: 'absolute', flex: 1, alignSelf: 'center'}}>
+          {componentEmpty()}
+        </View>
         <FlatList
           ref={this.setListView.bind(this)}
-          data={this.data()}
+          data={data}
           keyExtractor={item => item.id()}
           onScroll={this.handleScroll.bind(this)}
           onMomentumScrollEnd={this.onMomentumScrollEnd.bind(this)}

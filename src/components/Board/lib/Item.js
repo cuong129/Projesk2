@@ -31,10 +31,6 @@ class Item {
     return this._attributes.columnId;
   }
 
-  columnIndex() {
-    return this._attributes.columnIndex;
-  }
-
   isVisible() {
     return this._attributes.visible;
   }
@@ -65,10 +61,6 @@ class Item {
 
   setColumnId(columnId) {
     this._attributes.columnId = columnId;
-  }
-
-  setColumnIndex(columnIndex) {
-    this._attributes.columnIndex = columnIndex;
   }
 
   setIndex(index) {

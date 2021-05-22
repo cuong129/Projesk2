@@ -40,6 +40,8 @@ import TagColorBoard from '../components/TagColorBoard'
 export default class TaskScreen extends Component {
   constructor(props) {
     super(props);
+
+    const data = this.props.route.params.data
     this.state = {
       arrChecklist: [],
       ChecklistName: '',

@@ -26,19 +26,19 @@ class ColumnItem {
       id: -2,
       index: 100000,
       columnId: this.id(),
-      columnIndex: this.index(),
-      row: { id: -2 },
+      row: {id: -2},
       hidden: true,
       locked: true,
       visible: false,
     });
+    
     return _(items)
-      .sortBy((item) => item.index())
+      .sortBy(item => item.index())
       .concat([fake]);
   }
 
   visibleItems(columnId) {
-    return _(this.items(columnId)).filter((item) => item.isVisible());
+    return _(this.items(columnId)).filter(item => item.isVisible());
   }
 
   scrollOffset() {
@@ -93,7 +93,7 @@ class ColumnItem {
     const ref = this.ref();
     ref &&
       ref.measure((fx, fy, width, height, px, py) => {
-        const layout = { x: px, y: py, width: width, height: height };
+        const layout = {x: px, y: py, width: width, height: height};
         this.setLayout(layout);
       });
   }

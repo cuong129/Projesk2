@@ -3,7 +3,6 @@ import _ from 'underscore';
 import ReactTimeout from 'react-timeout';
 import Column from './Column';
 import TaskWrapper from './TaskWrapper';
-import DraggableFlatList from 'react-native-draggable-flatlist';
 
 import {
   PanResponder,
@@ -214,7 +213,7 @@ class Board extends React.Component {
       }
 
       if (!this.state.movingMode) {
-        this.open(item.row(), item.columnIndex(), item.index());
+        this.open(item.row(), item.columnId(), item.index());
       } else {
         this.endMoving();
       }
@@ -274,6 +273,7 @@ class Board extends React.Component {
           onPanResponderMove={this.onPanResponderMove.bind(this)}
           onPanResponderRelease={this.onPanResponderRelease.bind(this)}
           renderWrapperRow={this.renderWrapperRow.bind(this)}
+          renderColumnEmpty={this.props.renderColumnEmpty}
           onScrollingStarted={this.onScrollingStarted.bind(this)}
           onScrollingEnded={this.onScrollingEnded.bind(this)}
         />

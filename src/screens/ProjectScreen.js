@@ -8,6 +8,7 @@ import {
   Button,
   Icon,
   Title,
+  Text,
 } from 'native-base';
 import {
   ImageBackground,
@@ -150,6 +151,7 @@ export default class ProjectScreen extends Component {
             rowRepository={rowRepository}
             renderRow={this.renderRow.bind(this)}
             renderColumnWrapper={this.renderColumnWrapper.bind(this)}
+            renderColumnEmpty={this.renderColumnEmpty.bind(this)}
             open={this.onOpen.bind(this)}
             onDragEnd={this.onDragEnd.bind(this)}
           />
@@ -166,7 +168,7 @@ export default class ProjectScreen extends Component {
   renderRow(item) {
     return (
       <View style={styles.cardTask}>
-        <TaskItem />
+        <TaskItem item={item}/>
       </View>
     );
   }
@@ -179,7 +181,18 @@ export default class ProjectScreen extends Component {
           columnTask={column}
           component={columnComponent}
           idProject={this.idProject}
+          tasks={this.state.project.tasks}
         />
+      </View>
+    );
+  }
+
+  renderColumnEmpty() {
+    return (
+      <View style={styles.containerView}>
+        <Icon name="checkmark-circle" style={styles.iconEmpty} />
+        <Text note>You have no tasks</Text>
+        <Text note>Tap + to create a new one</Text>
       </View>
     );
   }
@@ -189,10 +202,23 @@ export default class ProjectScreen extends Component {
       task: item,
       columnIndex: columnIndex,
       index: index,
+      data: this.state.rowRepository.columns(),
     });
   }
 
-  onDragEnd(srcColumnId, destColumnId, item) {}
+  onDragEnd(srcColumnId, destColumnId, item) {
+    const newData = [...this.state.project.tasks];
+
+    const row = {...item.row()};
+    const indexOld = newData[srcColumnId].rows.indexOf(row);
+
+    newData[srcColumnId].rows.splice(indexOld, 1);
+    newData[destColumnId].rows.splice(item.index(), 0, row);
+
+    firestore().collection('Projects').doc(this.idProject).update({
+      tasks: newData,
+    });
+  }
 }
 
 const styles = StyleSheet.create({
@@ -214,5 +240,15 @@ const styles = StyleSheet.create({
   cardTask: {
     width: 280,
     alignSelf: 'center',
+  },
+  iconEmpty: {
+    fontSize: 50,
+    padding: 10,
+    color: colors.Disable,
+  },
+  containerView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

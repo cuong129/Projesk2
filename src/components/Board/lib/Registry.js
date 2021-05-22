@@ -25,7 +25,6 @@ class Registry {
     };
     const rows = columnData.rows;
     const itemsMap = this.buildItemsMap(
-      columnIndex,
       columnId,
       rows,
       existingAttributes.items
@@ -43,7 +42,7 @@ class Registry {
     return item && item.attributes();
   }
 
-  buildItemsMap(columnIndex, columnId, rows, existingItems) {
+  buildItemsMap(columnId, rows, existingItems) {
     const items = _.range(rows.length).map((index) => {
       const row = rows[index];
       const id = row.id;
@@ -53,7 +52,6 @@ class Registry {
         Object.assign(existingItemAttributes, {
           id: id,
           index: index,
-          columnIndex: columnIndex,
           columnId: columnId,
           row: row,
         })
