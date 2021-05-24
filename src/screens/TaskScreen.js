@@ -42,6 +42,8 @@ export default class TaskScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      taskName: '',
+      taskNote: '',
       arrChecklist: [],
       ChecklistName: '',
       date: new Date(),
@@ -58,8 +60,25 @@ export default class TaskScreen extends Component {
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    console.log(this.props.route.params.tasks)
+    this.initValue();
   }
+  initValue() {
+    const task = this.props.route.params.task;
+    this.setState({
+      taskName: task.name,
+      taskNote: task.note,
+      arrChecklist: task.checklist,
+      arrTaglist: task.tag,
+    });
+    if (task.date != null) {
+      this.setState({
+        date: task.date.toDate(),
+        time: task.date.toDate(),
+        hasDateSelected: true,
+      })
+    }
+  }
+
   handleAddChecklistItem = () => {
     this.setState({
       arrChecklist: [...this.state.arrChecklist, { id: uuidv4(), hasChecked: false, name: this.state.ChecklistName }],
@@ -160,18 +179,25 @@ export default class TaskScreen extends Component {
     firestore()
       .collection("Projects")
       .doc(this.props.route.params.idProject)
-      .update({
+      .set({
         tasks: this.updateTask(),
       })
-    
-      console.log("123")
+    this.props.navigation.goBack();
+    console.log("123")
   }
   updateTask() {
-    var newTasks = this.props.route.params.tasks;
-    newTasks[0].rows[0].name = "423423432";
-    newTasks[0].rows[0].tag = this.state.arrTaglist;
-    console.log(newTasks)
-    return newTasks
+    const { listTask, columnIndex, index } = this.props.route.params;
+    const { taskName, taskNote, arrChecklist, arrTaglist, date, hasDateSelected } = this.state;
+    var newTasks = listTask;
+    newTasks[columnIndex].rows[index].name = taskName;
+    newTasks[columnIndex].rows[index].note = taskNote;
+    newTasks[columnIndex].rows[index].tag = arrTaglist;
+    newTasks[columnIndex].rows[index].checklist = arrChecklist;
+    if (hasDateSelected) {
+      newTasks[columnIndex].rows[index].date = date;
+    }
+    console.log(newTasks);
+    return newTasks;
   }
 
   render() {
@@ -207,11 +233,17 @@ export default class TaskScreen extends Component {
           )}
           <Item style={styles.titleItem}>
             <Input
-              placeholder={this.props.route.params.task.name}
+              value={this.state.taskName}
+              placeholder="Add task name"
+              onChangeText={(text) => this.setState({ taskName: text })}
               style={{ fontSize: 24 }} />
           </Item>
           <Item style={styles.item}>
-            <Input multiline placeholder="Add card description" />
+            <Input
+              multiline
+              value={this.state.taskNote}
+              placeholder="Add card description"
+              onChangeText={(text) => this.setState({ taskNote: text })} />
           </Item>
           <Item>
             <TouchableOpacity style={styles.button}>
@@ -260,7 +292,7 @@ export default class TaskScreen extends Component {
             </TouchableOpacity>
           </Item>
           <RBSheet
-            ref={ref => {this.RBSheet = ref;}}
+            ref={ref => { this.RBSheet = ref; }}
             height={250}
             openDuration={250}
             customStyles={{
@@ -273,7 +305,7 @@ export default class TaskScreen extends Component {
             <TagColorBoard selectedColor={this.state.selectedColor} onPressColor={this.handlePressColor} />
           </RBSheet>
           <RBSheet
-            ref={ref => {this.RBSheetItem = ref;}}
+            ref={ref => { this.RBSheetItem = ref; }}
             height={250}
             openDuration={250}
             customStyles={{
