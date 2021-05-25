@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Container,
   Header,
@@ -14,9 +14,9 @@ import {
   Right,
 } from 'native-base';
 
-import {Image, StyleSheet, View, FlatList, ScrollView} from 'react-native';
-import {colors} from '../res/colors';
-import {wrap} from 'underscore';
+import { Image, StyleSheet, View, FlatList, ScrollView } from 'react-native';
+import { colors, ColorBoard } from '../res/colors';
+import { wrap } from 'underscore';
 
 export default class TaskItem extends Component {
   constructor(props) {
@@ -26,75 +26,131 @@ export default class TaskItem extends Component {
         {
           id: 1,
         },
-        {id: 2},
-        {id: 3},
-        {id: 4},
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
       ],
       tags: [
         {
           id: 1,
         },
-        {id: 2},
-        {id: 3},
-        {id: 4},
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
       ],
     };
   }
-
+  renderChecklist(checklist) {
+    var numChecked = 0;
+    for (var i = 0; i < checklist.length; i++) {
+      if (checklist[i].hasChecked)
+        numChecked++;
+    }
+    return numChecked + '/' + checklist.length;
+  }
+  dateDiff(start, end) {
+    var startDate = new Date(start.toDate());
+    startDate.setSeconds(0);
+    var endDate = new Date(end.toDate());
+    endDate.setSeconds(0);
+    return Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
+  }
+  hourDiff(start, end) {
+    var startDate = new Date(start.toDate());
+    startDate.setSeconds(0);
+    var endDate = new Date(end.toDate());
+    endDate.setSeconds(0);
+    return Math.floor((endDate - startDate) / (1000 * 60 * 60)) % 24;
+  }
+  minuteDiff(start, end) {
+    var startDate = new Date(start.toDate());
+    startDate.setSeconds(0);
+    var endDate = new Date(end.toDate());
+    endDate.setSeconds(0);
+    return Math.floor((endDate - startDate) / (1000 * 60)) % 60;
+  }
+  renderCompleteTime(start, end) {
+    const date = this.dateDiff(start, end);
+    const str1 = date !== 0 ? date + 'd' : '';
+    const hour = this.hourDiff(start, end);
+    const str2 = hour !== 0 ? hour + 'h' : '';
+    const minute = this.minuteDiff(start, end);
+    const str3 = minute !== 0 ? minute + 'min' : '';
+    return str1 + ' ' + str2 + ' ' + str3;
+  }
+  formatDate(date) {
+    var hour = date.getHours()
+    var minute = date.getMinutes()
+    if (hour < 10)
+      hour = '0' + hour
+    if (minute < 10)
+      minute = '0' + minute
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ` + hour + ':' + minute;
+  }
   render() {
+    const { item } = this.props;
     return (
       <Card>
         <CardItem>
           <Left>
             <Body>
-              <Text>Task Name</Text>
-              <Text note>Note</Text>
-              <View style={{flexDirection: 'row'}}>
-                <Text style={{color: colors.Positive}}>03:24:00</Text>
-                <Text note> / 10:00:00</Text>
-              </View>
+              <Text>{item.name}</Text>
+              <Text note>{item.note}</Text>
+              {item.complete != null && item.complete.hasCompleted && (
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={{
+                    color: item.complete.date <= item.DueDate ? colors.Positive : colors.Danger,
+                    fontSize: 14
+                  }}>
+                    {this.renderCompleteTime(item.StartDate, item.complete.date)}
+                  </Text>
+                  <Text style={{ fontSize: 14 }}>{' / ' + this.renderCompleteTime(item.StartDate, item.DueDate)}</Text>
+                </View>)
+              }
             </Body>
           </Left>
         </CardItem>
         <View style={styles.cardItem}>
           <FlatList
-            columnWrapperStyle={{flexWrap: 'wrap'}}
+            columnWrapperStyle={{ flexWrap: 'wrap' }}
             numColumns={5}
             data={this.state.assigns}
-            renderItem={({item}) => <Image style={styles.imageCircle} />}
+            renderItem={({ item }) => <Image style={styles.imageCircle} />}
             keyExtractor={item => item.id}
             listKey={(item, index) => 'D' + index.toString()}
           />
-
-          <FlatList
-            columnWrapperStyle={{flexWrap: 'wrap'}}
-            numColumns={4}
-            data={this.state.tags}
-            renderItem={({item}) => (
-              <View style={styles.tag}>
-                <Text style={styles.titleTag}>aaa</Text>
-              </View>
-            )}
-            keyExtractor={item => item.id}
-          />
+          {item.tag != null && (
+            <FlatList
+              columnWrapperStyle={{ flexWrap: 'wrap' }}
+              numColumns={4}
+              data={item.tag}
+              renderItem={({ item }) => (
+                <View style={[styles.tag, { backgroundColor: ColorBoard[item.colorIndex] }]}>
+                  <Text style={styles.titleTag}>{item.name}</Text>
+                </View>
+              )}
+              keyExtractor={item => item.id}
+            />)}
         </View>
         <CardItem bordered footer>
           <Left>
             <View style={styles.chatbox}>
-              <Icon name="chatbox" style={{color: '#58B6FF', fontSize: 20}} />
+              <Icon name="chatbox" style={{ color: '#58B6FF', fontSize: 20 }} />
               <Text note>12</Text>
             </View>
-            <View style={styles.checkBox}>
-              <Icon
-                name="checkbox-sharp"
-                style={{color: '#49CC87', fontSize: 20}}
-              />
-              <Text note>0/3</Text>
-            </View>
-            <View style={styles.checkBox}>
-              <Icon name="calendar" style={{color: '#FFC845', fontSize: 20}} />
-              <Text note>May 24, 2019</Text>
-            </View>
+            {item.checklist != null && (
+              <View style={styles.checkBox}>
+                <Icon
+                  name="checkbox-sharp"
+                  style={{ color: '#49CC87', fontSize: 20 }}
+                />
+                <Text note>{this.renderChecklist(item.checklist)}</Text>
+              </View>)}
+            {item.DueDate != null && (
+              <View style={styles.checkBox}>
+                <Icon name="calendar" style={{ color: '#FFC845', fontSize: 20 }} />
+                <Text note>{this.formatDate(item.DueDate.toDate())}</Text>
+              </View>)}
           </Left>
         </CardItem>
       </Card>
@@ -121,7 +177,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   tag: {
-    backgroundColor: '#DB3355',
     borderRadius: 4,
     marginRight: 10,
     marginTop: 10,

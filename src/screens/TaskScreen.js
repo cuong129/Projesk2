@@ -26,7 +26,8 @@ import {
   TouchableOpacity,
   LogBox,
   Platform,
-  StatusBar
+  StatusBar,
+  ActivityIndicatorComponent
 } from 'react-native';
 import { colors, ColorBoard } from '../res/colors';
 import ChecklistItem from '../components/ChecklistItem';
@@ -37,7 +38,7 @@ import RBSheet from "react-native-raw-bottom-sheet";
 
 import TagItem from '../components/TagItem';
 import TagColorBoard from '../components/TagColorBoard'
-import { firestore } from '../firebase';
+import { auth, firestore } from '../firebase';
 export default class TaskScreen extends Component {
   constructor(props) {
     super(props);
@@ -56,7 +57,10 @@ export default class TaskScreen extends Component {
       selectedColor: 3,
       selectedColorItem: 3,
       selectedIDTagItem: '',
+      completeBtn: 'COMPLETE',
+      completeDetail: 'This task is active',
     }
+    this.currentUser = auth().currentUser;
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
@@ -67,15 +71,27 @@ export default class TaskScreen extends Component {
     this.setState({
       taskName: task.name,
       taskNote: task.note,
-      arrChecklist: task.checklist,
-      arrTaglist: task.tag,
     });
-    if (task.date != null) {
+    if (task.checklist != null)
+      this.setState({ arrChecklist: task.checklist })
+    if (task.tag != null)
+      this.setState({ arrTaglist: task.tag })
+    if (task.DueDate != null) {
       this.setState({
-        date: task.date.toDate(),
-        time: task.date.toDate(),
+        date: new Date(task.DueDate.toDate()),
+        time: new Date(task.DueDate.toDate()),
         hasDateSelected: true,
       })
+    }
+    if (task.complete != null) {
+      const { hasCompleted, date, user } = task.complete;
+      if (hasCompleted) {
+        const dateCompleted = new Date(date.toDate());
+        this.setState({
+          completeBtn: 'RESTORE',
+          completeDetail: 'Completed by\n' + user + '\n' + this.formatDate(dateCompleted),
+        })
+      } 
     }
   }
 
@@ -125,9 +141,9 @@ export default class TaskScreen extends Component {
   showDatepicker = () => {
     this.setState({ show: true, mode: 'date' });
   };
-  formatDate = (date, time) => {
-    var hour = time.getHours()
-    var minute = time.getMinutes()
+  formatDate = (date) => {
+    var hour = date.getHours()
+    var minute = date.getMinutes()
     if (hour < 10)
       hour = '0' + hour
     if (minute < 10)
@@ -137,7 +153,7 @@ export default class TaskScreen extends Component {
 
   renderDateBtn() {
     if (this.state.hasDateSelected)
-      return this.formatDate(this.state.date, this.state.time)
+      return this.formatDate(this.state.date)
     return "Due Date"
   }
 
@@ -174,36 +190,69 @@ export default class TaskScreen extends Component {
     this.setState({ arrTaglist: newArr })
     this.RBSheetItem.close();
   }
-
-  handleUpdateTask = () => {
+  UpdateTasks(tasks) {
     firestore()
       .collection("Projects")
       .doc(this.props.route.params.idProject)
       .set({
-        tasks: this.updateTask(),
-      })
-    this.props.navigation.goBack();
-    console.log("123")
+        tasks: tasks,
+      });
   }
-  updateTask() {
-    const { listTask, columnIndex, index } = this.props.route.params;
+  handleUpdateTask = () => {
+    const { tasks, columnIndex, index } = this.props.route.params;
     const { taskName, taskNote, arrChecklist, arrTaglist, date, hasDateSelected } = this.state;
-    var newTasks = listTask;
+    var newTasks = tasks;
     newTasks[columnIndex].rows[index].name = taskName;
     newTasks[columnIndex].rows[index].note = taskNote;
-    newTasks[columnIndex].rows[index].tag = arrTaglist;
-    newTasks[columnIndex].rows[index].checklist = arrChecklist;
-    if (hasDateSelected) {
-      newTasks[columnIndex].rows[index].date = date;
+    newTasks[columnIndex].rows[index].tag = arrTaglist.length > 0 ? arrTaglist : null;
+    newTasks[columnIndex].rows[index].checklist = arrChecklist.length > 0 ? arrChecklist : null;
+    newTasks[columnIndex].rows[index].DueDate = hasDateSelected ? firestore.Timestamp.fromDate(date) : null;
+    console.log(newTasks[columnIndex].rows[index].date);
+    this.UpdateTasks(newTasks);
+    this.props.navigation.goBack();
+  }
+
+  handleDeleteTask = () => {
+    const { tasks, columnIndex, index } = this.props.route.params;
+    var newTasks = tasks;
+    newTasks[columnIndex].rows.splice(index, 1);
+    this.UpdateTasks(newTasks);
+    this.props.navigation.goBack();
+  }
+
+  handlePressComplete = () => {
+    const { tasks, columnIndex, index } = this.props.route.params;
+    var newTasks = tasks;
+    if (this.state.completeBtn === 'COMPLETE') {
+      var date = new Date();
+      var detail = 'Completed by\n' + this.currentUser.displayName + '\n' + this.formatDate(date);
+      this.setState({
+        completeDetail: detail,
+        completeBtn: 'RESTORE',
+      })
+      newTasks[columnIndex].rows[index].complete = {
+        hasCompleted: true, 
+        user: this.currentUser.displayName, 
+        date: firestore.Timestamp.fromDate(date) 
+      }
+    } else {
+      this.setState({
+        completeDetail: 'This task is active',
+        completeBtn: 'COMPLETE',
+      })
+      newTasks[columnIndex].rows[index].complete = { 
+        hasCompleted: false, 
+        user: null,
+        date: null
+     }
     }
-    console.log(newTasks);
-    return newTasks;
+    this.UpdateTasks(newTasks);
   }
 
   render() {
     return (
       <Container style={styles.container}>
-        <Header>
+        <Header style={{ backgroundColor: colors.Primary }}>
           <Left>
             <Button
               transparent
@@ -212,9 +261,12 @@ export default class TaskScreen extends Component {
             </Button>
           </Left>
           <Body>
-            <Title>Task name</Title>
+            <Title>Task detail</Title>
           </Body>
           <Right>
+            <Button transparent onPress={this.handleDeleteTask}>
+              <Icon name="delete" type='MaterialCommunityIcons' style={{ color: colors.Danger }} />
+            </Button>
             <Button transparent onPress={this.handleUpdateTask}>
               <Icon name="check" type='Feather' />
             </Button>
@@ -226,17 +278,25 @@ export default class TaskScreen extends Component {
               testID="dateTimePicker"
               value={this.state.date}
               mode={this.state.mode}
+              minimumDate={new Date()}
               is24Hour={true}
               display="spinner"
               onChange={this.onChange}
             />
           )}
+          <Item style={styles.completeTitle}>
+            {this.state.completeBtn === 'RESTORE' && (<Icon name="checkmark-circle-sharp" type='Ionicons' style={{ color: colors.Positive }}/>)}
+            <Text style={{ fontSize: 16, color: 'gray', flex: 1 }}>{this.state.completeDetail}</Text>
+            <TouchableOpacity onPress={this.handlePressComplete}>
+              <Text style={{ color: this.state.completeBtn === 'COMPLETE' ? colors.Positive : 'gray', fontWeight: 'bold' }}>{this.state.completeBtn}</Text>
+            </TouchableOpacity>
+          </Item>
           <Item style={styles.titleItem}>
             <Input
               value={this.state.taskName}
               placeholder="Add task name"
               onChangeText={(text) => this.setState({ taskName: text })}
-              style={{ fontSize: 24 }} />
+              style={{ fontSize: 22 }} />
           </Item>
           <Item style={styles.item}>
             <Input
@@ -352,6 +412,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.listTaskBackground,
     paddingTop: StatusBar.currentHeight - 4,
+  },
+  completeTitle: {
+    backgroundColor: 'transparent',
+    paddingVertical: 15,
+    paddingLeft: 10,
+    paddingRight: 25,
   },
   titleItem: {
     backgroundColor: "#fff",

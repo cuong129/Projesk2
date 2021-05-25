@@ -30,14 +30,14 @@ const AddTaskAlert = ({screen}) => {
       return;
     }
     if (isEmptyInput == 1) {
-      let newTask = {name: inputName, note: inputNote};
+      let newRow = {name: inputName, note: inputNote, StartDate: new Date()};
+      const props = screen.props;
+      let newTasks = [...props.tasks];
+      newTasks[props.index].rows.push(newRow);
 
-      firestore()
-        .collection('Projects')
-        .doc(screen.props.idProject)
-        .update({
-          [('tasks/0.rows')]: firestore.FieldValue.arrayUnion(newTask),
-        });
+      firestore().collection('Projects').doc(props.idProject).update({
+        tasks: newTasks,
+      });
       screen.setState({
         showAlert: false,
       });
