@@ -71,7 +71,11 @@ const ProjectAlert = ({screen, type}) => {
       note: inputNote,
       photoURL: inputPhotoURL,
       tasks: [
-        {name: 'To Do', color: ColorBoard[6], rows: [{name: 'test'}]},
+        {
+          name: 'To Do',
+          color: ColorBoard[6],
+          rows: [{name: 'test', assigns: []}],
+        },
         {name: 'Doing', color: ColorBoard[2], rows: []},
         {name: 'Done', color: ColorBoard[4], rows: []},
       ],

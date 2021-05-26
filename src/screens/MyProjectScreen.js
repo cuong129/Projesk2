@@ -143,9 +143,7 @@ export default class MyProjectScreen extends Component {
                     navigation.navigate('Project', {
                       screen: 'ProjectMain',
                       params: {
-                        project: item,
-                        source: source,
-                        resizeMode: resizeMode,
+                        idProject: item.id,
                       },
                     })
                   }

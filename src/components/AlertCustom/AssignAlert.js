@@ -1,46 +1,59 @@
 import React, {useState} from 'react';
 import AlertView from './AlertView';
-import {ListItem, Text, Left, Right, Body, Icon} from 'native-base';
-import {View, FlatList} from 'react-native';
+import {
+  ListItem,
+  Text,
+  Left,
+  Right,
+  Body,
+  Icon,
+  Thumbnail,
+  Item,
+} from 'native-base';
+import {View, FlatList, TouchableOpacity} from 'react-native';
 import {firestore} from '../../firebase';
 import {colors} from '../../res/colors';
 import {typeAlert} from '.';
 
 const AssignAlert = ({screen}) => {
-  const [isAdmin, setIsAdmin] = useState(screen.state.item.admin);
+  const props = screen.props.route.params;
+  const assignList = props.task.assigns;
+  const [assigns, setAssigns] = useState(assignList);
 
-  const updatePermission = () => {
-    const newMembers = [...screen.state.members];
-    newMembers[screen.state.index].admin = isAdmin;
-
-    firestore().collection('Projects').doc(screen.idProject).update({
-      members: newMembers,
-    });
-
-    screen.setState({
-      members: newMembers,
-      alert: typeAlert.NONE,
-    });
+  const doneAssign = () => {
+    // const newMembers = [...screen.state.members];
+    // newMembers[screen.state.index].admin = isAdmin;
+    // firestore().collection('Projects').doc(screen.idProject).update({
+    //   members: newMembers,
+    // });
+    // screen.setState({
+    //   members: newMembers,
+    //   alert: typeAlert.NONE,
+    // });
   };
 
-  const iconRight = (item, index) => {
-    return (
-      <View
-        style={{
-          justifyContent: 'center',
-          margin: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <Icon
-          name="checkmark-sharp"
-          style={{
-            color: colors.Disable,
-            fontSize: 28,
-          }}
-        />
-      </View>
-    );
+  const addAssign = item => {
+    let newAssign = {...item};
+    delete newAssign.name;
+    delete newAssign.admin;
+
+    const newAssigns = [...assigns, newAssign];
+    setAssigns(newAssigns);
+  };
+
+  const iconRight = item => {
+    assigns.forEach(element => {
+      if (element.uid == item.uid)
+        return (
+          <Icon
+            name="checkmark-sharp"
+            style={{
+              color: colors.Disable,
+              fontSize: 20,
+            }}
+          />
+        );
+    });
   };
 
   return (
@@ -48,21 +61,29 @@ const AssignAlert = ({screen}) => {
       screen={screen}
       title="Task Assign"
       positiveButtonText="DONE"
-      positiveButtonPress={updatePermission}
+      positiveButtonPress={doneAssign}
       componentBody={
         <View>
           <FlatList
-            data={members}
+            data={props.members}
             renderItem={({item, index}) => (
-              <ListItem avatar>
-                <Left>
-                  <Thumbnail source={{uri: item.photoURL}} small />
-                </Left>
-                <Body>
-                  <Text>{item.name}</Text>
-                </Body>
-                <Right>{iconRight(item, index)}</Right>
-              </ListItem>
+              <View style={{marginVertical: 10}}>
+                <ListItem avatar onPress={()=>addAssign(item)}>
+                  <Left>
+                    <Thumbnail source={{uri: item.photoURL}} small />
+                  </Left>
+                  <Body>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <Text>{item.name}</Text>
+                      {iconRight(item)}
+                    </View>
+                  </Body>
+                </ListItem>
+              </View>
             )}
             keyExtractor={item => item.uid}
           />

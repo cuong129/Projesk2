@@ -36,14 +36,15 @@ import OptionsMenu from 'react-native-options-menu';
 export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
-    this.project = this.props.route.params.project;
-    this.idProject = this.project.id;
+    this.idProject = this.props.route.params.idProject;
 
     this.state = {
       alert: typeAlert.NONE,
-      project: this.project,
+      project: {name: ''},
       rowRepository: new RowRepository([]),
       tasks: [],
+      source: require('../res/images/ic_app.png'),
+      resizeMode: 'center',
     };
   }
 
@@ -74,9 +75,15 @@ export default class ProjectScreen extends Component {
           });
         });
 
+        const url = data.photoURL;
         this.setState({
           project: data,
           rowRepository: new RowRepository(data.tasks),
+          source:
+            url == null || url === ''
+              ? require('../res/images/ic_app.png')
+              : {uri: url},
+          resizeMode: url == null || url === '' ? 'center' : 'cover',
         });
       });
 
@@ -110,7 +117,7 @@ export default class ProjectScreen extends Component {
   showMember = () => {
     this.props.navigation.navigate('Member', {
       idProject: this.idProject,
-      members: this.state.project.members
+      members: this.state.project.members,
     });
   };
 
@@ -134,8 +141,7 @@ export default class ProjectScreen extends Component {
   };
 
   render() {
-    const {project, rowRepository} = this.state;
-    const {source, resizeMode} = this.props.route.params;
+    const {project, rowRepository, source, resizeMode} = this.state;
     const {navigation} = this.props;
 
     return (
@@ -233,12 +239,14 @@ export default class ProjectScreen extends Component {
   }
 
   onOpen(item, columnIndex, index) {
+    const {tasks, members} = this.state.project;
     this.props.navigation.navigate('Task', {
       idProject: this.idProject,
       task: item,
       columnIndex: columnIndex,
       index: index,
-      tasks: this.state.project.tasks,
+      tasks: tasks,
+      members: members,
     });
   }
 

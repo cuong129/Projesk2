@@ -3,7 +3,7 @@ import AlertView from './AlertView';
 import {Input, Item, Icon, Text} from 'native-base';
 import {View} from 'react-native';
 import {firestore} from '../../firebase';
-import { typeAlert } from '.';
+import {typeAlert} from '.';
 
 const AddTaskAlert = ({screen}) => {
   const [isEmptyInput, setIsEmptyInput] = useState(0);
@@ -32,7 +32,12 @@ const AddTaskAlert = ({screen}) => {
       return;
     }
     if (isEmptyInput == 1) {
-      let newRow = {name: inputName, note: inputNote, StartDate: new Date()};
+      let newRow = {
+        name: inputName,
+        note: inputNote,
+        StartDate: new Date(),
+        assigns: [],
+      };
       const props = screen.props;
       let newTasks = [...props.tasks];
       newTasks[props.index].rows.push(newRow);
