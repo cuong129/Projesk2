@@ -32,7 +32,7 @@ const AddTaskAlert = ({screen}) => {
       return;
     }
     if (isEmptyInput == 1) {
-      let newRow = {name: inputName, note: inputNote};
+      let newRow = {name: inputName, note: inputNote, StartDate: new Date()};
       const props = screen.props;
       let newTasks = [...props.tasks];
       newTasks[props.index].rows.push(newRow);

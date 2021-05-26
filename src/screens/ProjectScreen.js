@@ -36,7 +36,6 @@ import OptionsMenu from 'react-native-options-menu';
 export default class ProjectScreen extends Component {
   constructor(props) {
     super(props);
-
     this.project = this.props.route.params.project;
     this.idProject = this.project.id;
 
@@ -44,6 +43,7 @@ export default class ProjectScreen extends Component {
       alert: typeAlert.NONE,
       project: this.project,
       rowRepository: new RowRepository([]),
+      tasks: [],
     };
   }
 
@@ -234,10 +234,11 @@ export default class ProjectScreen extends Component {
 
   onOpen(item, columnIndex, index) {
     this.props.navigation.navigate('Task', {
+      idProject: this.idProject,
       task: item,
       columnIndex: columnIndex,
       index: index,
-      data: this.state.rowRepository.columns(),
+      tasks: this.state.project.tasks,
     });
   }
 

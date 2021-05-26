@@ -10,7 +10,7 @@ export default function ChecklistItem(props) {
       <ListItem style={styles.checklistItem}>
         <CheckBox 
           style={{width: 22, height: 22}} 
-          checked={item.isChecked}
+          checked={item.hasChecked}
           onPress={() => {onCheckboxPress(item.id)}} />
         <Input 
           style={[styles.input, item.isChecked ? {textDecorationLine: 'line-through'} : {textDecorationLine: 'none'} ]} 
