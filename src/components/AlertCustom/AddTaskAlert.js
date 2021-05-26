@@ -3,6 +3,7 @@ import AlertView from './AlertView';
 import {Input, Item, Icon, Text} from 'native-base';
 import {View} from 'react-native';
 import {firestore} from '../../firebase';
+import { typeAlert } from '.';
 
 const AddTaskAlert = ({screen}) => {
   const [isEmptyInput, setIsEmptyInput] = useState(0);
@@ -11,8 +12,9 @@ const AddTaskAlert = ({screen}) => {
   const [inputNote, setInputNote] = useState('');
 
   const onTextChange = text => {
-    setInputName(text);
-    if (!text || text === '') {
+    const name = text.trim();
+    setInputName(name);
+    if (name === '') {
       if (isEmptyInput == -1) return;
       setIconInput('close-circle');
       setIsEmptyInput(-1);
@@ -39,18 +41,17 @@ const AddTaskAlert = ({screen}) => {
         tasks: newTasks,
       });
       screen.setState({
-        showAlert: false,
+        alert: typeAlert.NONE,
       });
     }
   };
 
   return (
     <AlertView
-      show={screen.state.showAlert}
+      screen={screen}
       title="Add New Task"
-      positveButtonText="ADD"
-      positveButtonPress={AddTask}
-      cancelButtonPress={() => screen.setState({showAlert: false})}
+      positiveButtonText="ADD"
+      positiveButtonPress={AddTask}
       componentBody={
         <View>
           <Text note>{'List ' + screen.props.columnTask.name}</Text>

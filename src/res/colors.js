@@ -4,6 +4,7 @@ const colors = {
   DarkPrimary: '#3369CD',
   Background: '#F9F9F9',
   Danger: '#ED1727',
+  Warning: "#FAAD14",
   Positive: '#3DCC3D',
   listTaskBackground: 'rgba(255,255,255,0.5)',
   Disable: '#A9B0B4'

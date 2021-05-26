@@ -18,8 +18,9 @@ import ProjectItem from '../components/ProjectItem';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
-import {AddProjectAlert} from '../components/AlertCustom/index';
+import {ProjectAlert, typeAlert} from '../components/AlertCustom/index';
 import {auth, firestore} from '../firebase';
+import SearchBar from '../components/SearchBar';
 
 export default class MyProjectScreen extends Component {
   constructor(props) {
@@ -27,14 +28,14 @@ export default class MyProjectScreen extends Component {
     this.state = {
       loading: true,
       projects: [],
-      showAlert: false,
+      alert: typeAlert.NONE,
     };
     this.currentUser = auth().currentUser;
   }
 
   componentDidMount() {
     this.setState({loading: true});
-    const subscriber = firestore()
+    this.subscriber = firestore()
       .collection('Users')
       .doc(this.currentUser.uid)
       .onSnapshot(querySnapshot => {
@@ -47,6 +48,10 @@ export default class MyProjectScreen extends Component {
 
     // Unsubscribe from events when no longer in use
     return () => subscriber();
+  }
+
+  componentWillUnmount() {
+    this.subscriber();
   }
 
   getAllInfoProject(MyProjectIds, index, projects, MyProjectIdCopy) {
@@ -154,19 +159,14 @@ export default class MyProjectScreen extends Component {
     };
 
     const showAlert = () => {
-      if (this.state.showAlert) return <AddProjectAlert screen={this} />;
+      if (this.state.alert == typeAlert.CREATE_PROJECT)
+        return <ProjectAlert screen={this} type={typeAlert.CREATE_PROJECT} />;
     };
 
     return (
       <Container style={{backgroundColor: colors.Background}}>
-        <Header style={{backgroundColor: 'white'}} searchBar rounded>
-          <Item>
-            <Icon name="search" />
-            <Input placeholder="Search projects..." />
-          </Item>
-          <Button transparent>
-            <Text>Search</Text>
-          </Button>
+        <Header style={{backgroundColor: 'white'}}>
+          <SearchBar style={styles.searchBar} />
         </Header>
         <FocusAwareStatusBar backgroundColor="white" barStyle="dark-content" />
         <View style={styles.titleView}>
@@ -176,9 +176,7 @@ export default class MyProjectScreen extends Component {
         {componentBody()}
         <Fab
           style={{backgroundColor: colors.Primary}}
-          onPress={() => {
-            this.setState({showAlert: true});
-          }}>
+          onPress={() => this.setState({alert: typeAlert.CREATE_PROJECT})}>
           <Icon name="add" />
         </Fab>
       </Container>
@@ -200,7 +198,7 @@ const styles = StyleSheet.create({
     elevation: 0.5,
   },
   titleText: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
     paddingTop: 10,
     paddingBottom: 20,
     fontSize: 20,
@@ -215,4 +213,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  searchBar:{
+    alignSelf:'center',
+    width:'100%',
+    paddingHorizontal:5
+  }
 });

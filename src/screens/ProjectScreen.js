@@ -19,13 +19,19 @@ import {
   View,
   FlatList,
   TextInput,
+  Alert,
 } from 'react-native';
 import {colors} from '../res/colors';
 import ListTaskItem from '../components/ListTaskItem';
 import TaskItem from '../components/TaskItem';
 import {Board, RowRepository} from '../components/Board/index';
-import {ListTaskAlert} from '../components/AlertCustom/index';
+import {
+  ListTaskAlert,
+  ProjectAlert,
+  typeAlert,
+} from '../components/AlertCustom/index';
 import {auth, firestore} from '../firebase';
+import OptionsMenu from 'react-native-options-menu';
 
 export default class ProjectScreen extends Component {
   constructor(props) {
@@ -34,33 +40,8 @@ export default class ProjectScreen extends Component {
     this.project = this.props.route.params.project;
     this.idProject = this.project.id;
 
-    const data = [
-      {
-        id: 1,
-        name: 'To do',
-        color: '#DA3553',
-        rows: [
-          {id: 1, name: 'Map'},
-          {id: 2, name: 'Grid'},
-          {id: 4, name: 'me'},
-        ],
-      },
-      {
-        id: 2,
-        name: 'Done',
-        color: '#01A5F4',
-        rows: [{id: 3, name: 'Boss'}],
-      },
-      {
-        id: 3,
-        name: 'Doing',
-        color: '#FFD800',
-        rows: [{id: 5, name: 'collision'}],
-      },
-    ];
-
     this.state = {
-      showAddList: false,
+      alert: typeAlert.NONE,
       project: this.project,
       rowRepository: new RowRepository([]),
     };
@@ -107,13 +88,50 @@ export default class ProjectScreen extends Component {
     this.subscriber();
   }
 
-  AddList = () => {
-    this.setState({showAddList: true});
-  };
+  AddList() {
+    this.setState({alert: typeAlert.ADD_LIST});
+  }
 
   showAlert() {
-    if (this.state.showAddList) return <ListTaskAlert screen={this} />;
+    switch (this.state.alert) {
+      case typeAlert.ADD_LIST:
+        return <ListTaskAlert screen={this} type={typeAlert.ADD_LIST} />;
+      case typeAlert.EDIT_PROJECT:
+        return <ProjectAlert screen={this} type={typeAlert.EDIT_PROJECT} />;
+      default:
+      // code block
+    }
   }
+
+  editProject = () => {
+    this.setState({alert: typeAlert.EDIT_PROJECT});
+  };
+
+  showMember = () => {
+    this.props.navigation.navigate('Member', {
+      idProject: this.idProject,
+      members: this.state.project.members
+    });
+  };
+
+  deleteProject = () => {
+    Alert.alert(
+      'Warning',
+      'Are you sure delete project ' + this.state.project.name,
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          style: 'destructive',
+          onPress: () =>
+            firestore().collection('Projects').doc(this.idProject).delete(),
+        },
+      ],
+    );
+  };
 
   render() {
     const {project, rowRepository} = this.state;
@@ -140,9 +158,26 @@ export default class ProjectScreen extends Component {
               <Button transparent onPress={this.AddList.bind(this)}>
                 <Icon name="add-outline" />
               </Button>
-              <Button transparent>
-                <Icon name="ellipsis-vertical" />
-              </Button>
+              <OptionsMenu
+                customButton={
+                  <View style={{justifyContent: 'center', margin: 12}}>
+                    <Icon
+                      name="ellipsis-vertical"
+                      style={{
+                        color: 'white',
+                        fontSize: 20,
+                      }}
+                    />
+                  </View>
+                }
+                destructiveIndex={1}
+                options={['Edit Project', 'Member', 'Delete Project']}
+                actions={[
+                  this.editProject,
+                  this.showMember,
+                  this.deleteProject,
+                ]}
+              />
             </Right>
           </Header>
           {this.showAlert()}
@@ -168,7 +203,7 @@ export default class ProjectScreen extends Component {
   renderRow(item) {
     return (
       <View style={styles.cardTask}>
-        <TaskItem item={item}/>
+        <TaskItem item={item} />
       </View>
     );
   }
