@@ -2,15 +2,15 @@ import React, {useState} from 'react';
 import {Modal, StyleSheet, View, Text} from 'react-native';
 import {Button} from 'native-base';
 import {colors} from '../../res/colors';
+import typeAlert from './TypeAlert';
 
 const AlertView = ({
+  screen,
   title,
-  positveButtonText,
-  positveButtonPress,
-  cancelButtonPress,
+  positiveButtonText,
+  positiveButtonPress,
   componentBody,
 }) => {
-
   return (
     <Modal animationType="fade" transparent={true}>
       <View style={styles.centeredView}>
@@ -23,12 +23,12 @@ const AlertView = ({
             <Button
               transparent
               style={{marginRight: 20}}
-              onPress={cancelButtonPress}>
+              onPress={() => screen.setState({alert: typeAlert.NONE})}>
               <Text style={{color: 'black', fontSize: 15}}>CANCEL</Text>
             </Button>
-            <Button transparent onPress={positveButtonPress}>
+            <Button transparent onPress={positiveButtonPress}>
               <Text style={{color: colors.Primary, fontSize: 15}}>
-                {positveButtonText}
+                {positiveButtonText}
               </Text>
             </Button>
           </View>

@@ -26,6 +26,7 @@
     "react-native-draggable-flatlist": "^2.6.1",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-get-random-values": "^1.7.0",
+    "react-native-options-menu": "^2.0.2",
     "react-native-raw-bottom-sheet": "^2.2.0",
     "react-native-reanimated": "^2.1.0",
     "react-native-safe-area-context": "^3.2.0",

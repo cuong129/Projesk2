@@ -2,19 +2,60 @@ import React, {Component} from 'react';
 import {Icon, Text} from 'native-base';
 import {FlatList, StyleSheet, View, ScrollView, Alert} from 'react-native';
 import {colors} from '../res/colors';
-import {AddTaskAlert} from '../components/AlertCustom/index';
+import {AddTaskAlert, typeAlert, ListTaskAlert} from '../components/AlertCustom/index';
+import OptionsMenu from 'react-native-options-menu';
+import {firestore} from '../firebase';
 
 export default class ListTaskItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showAlert: false,
+      alert: typeAlert.NONE,
     };
   }
 
   showAlert() {
-    if (this.state.showAlert) return <AddTaskAlert screen={this} />;
+    switch (this.state.alert) {
+      case typeAlert.ADD_TASK:
+        return <AddTaskAlert screen={this} />;
+      case typeAlert.EDIT_LIST:
+        return <ListTaskAlert screen={this} type={typeAlert.EDIT_LIST} />;
+      default:
+      // code block
+    }
   }
+
+  deleteList = () => {
+    Alert.alert(
+      'Warning',
+      'Are you sure delete list ' + this.props.columnTask.name,
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          style: 'destructive',
+          onPress: () => {
+            const newTasks =[...this.props.tasks]
+            newTasks.splice(this.props.index, 1);
+
+            firestore()
+              .collection('Projects')
+              .doc(this.props.idProject)
+              .update({
+                tasks: newTasks,
+              });
+          },
+        },
+      ],
+    );
+  };
+
+  editList = () => {
+    this.setState({alert: typeAlert.EDIT_LIST})
+  };
 
   render() {
     const {columnTask, component} = this.props;
@@ -28,9 +69,16 @@ export default class ListTaskItem extends Component {
             <Icon
               name="add-outline"
               style={styles.iconTop}
-              onPress={() => this.setState({showAlert: true})}
+              onPress={() => this.setState({alert: typeAlert.ADD_TASK})}
             />
-            <Icon name="ellipsis-vertical" style={styles.iconTop} />
+            <OptionsMenu
+              customButton={
+                <Icon name="ellipsis-vertical" style={styles.iconTop} />
+              }
+              destructiveIndex={1}
+              options={['Edit','Delete']}
+              actions={[this.editList, this.deleteList]}
+            />
           </View>
         </View>
         <View style={styles.carItemBody}>{component}</View>
@@ -74,5 +122,4 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 20,
   },
-
 });

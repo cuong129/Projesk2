@@ -191,6 +191,7 @@ function ProjectScreen() {
     <Project.Navigator headerMode="none">
       <Project.Screen name="ProjectMain" component={screen.ProjectScreen} />
       <Project.Screen name="Task" component={screen.TaskScreen} />
+      <Project.Screen name="Member" component={screen.MemberScreen} />
     </Project.Navigator>
   );
 }
