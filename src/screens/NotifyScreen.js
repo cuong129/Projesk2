@@ -17,28 +17,7 @@ export default class NotifyScreen extends Component {
         photoURL: this.currentUser.photoURL,
         type: 'invite',
         idProject: "8q2qhSgVqTWHZ4Wq3SCH",
-      },
-      {
-        id: 2,
-        name: this.currentUser.displayName,
-        photoURL: this.currentUser.photoURL,
-        type: 'remove',
-        idProject: "8q2qhSgVqTWHZ4Wq3SCH",
-      },
-      {
-        id: 3,
-        name: this.currentUser.displayName,
-        photoURL: this.currentUser.photoURL,
-        type: 'deadline',
-        idProject: "vBIgMBoaNgZlNNUqLIj9",
-      },
-      {
-        id: 4,
-        name: this.currentUser.displayName,
-        photoURL: this.currentUser.photoURL,
-        type: 'assign',
-        idProject: "vBIgMBoaNgZlNNUqLIj9",
-      }]
+      },]
     }
   }
   handlePressItem = (id) => {

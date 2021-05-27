@@ -45,7 +45,10 @@ export default class ProjectScreen extends Component {
       tasks: [],
       source: require('../res/images/ic_app.png'),
       resizeMode: 'center',
+      currentMember: {admin: false},
     };
+
+    this.currentUser = auth().currentUser;
   }
 
   componentDidMount() {
@@ -56,7 +59,7 @@ export default class ProjectScreen extends Component {
         if (!querySnapshot.exists) {
           firestore()
             .collection('Users')
-            .doc(auth().currentUser.uid)
+            .doc(this.currentUser.uid)
             .update({
               myProjects: firestore.FieldValue.arrayRemove(this.idProject),
             });
@@ -75,6 +78,11 @@ export default class ProjectScreen extends Component {
           });
         });
 
+        let found = data.members.find(
+          element => element.uid == this.currentUser.uid,
+        );
+        if (!found) found = {admin: false};
+
         const url = data.photoURL;
         this.setState({
           project: data,
@@ -84,6 +92,7 @@ export default class ProjectScreen extends Component {
               ? require('../res/images/ic_app.png')
               : {uri: url},
           resizeMode: url == null || url === '' ? 'center' : 'cover',
+          currentMember: found,
         });
       });
 
@@ -122,9 +131,11 @@ export default class ProjectScreen extends Component {
   };
 
   deleteProject = () => {
+    const {currentMember} = this.state;
+    const content = currentMember.admin ? 'delete' : 'leave';
     Alert.alert(
       'Warning',
-      'Are you sure delete project ' + this.state.project.name,
+      'Are you sure ' + content + ' project ' + this.state.project.name,
       [
         {
           text: 'No',
@@ -133,15 +144,39 @@ export default class ProjectScreen extends Component {
         {
           text: 'Yes',
           style: 'destructive',
-          onPress: () =>
-            firestore().collection('Projects').doc(this.idProject).delete(),
+          onPress: () => {
+            if (currentMember.admin)
+              firestore().collection('Projects').doc(this.idProject).delete();
+            else {
+              firestore()
+                .collection('Users')
+                .doc(this.currentUser.uid)
+                .update({
+                  myProjects: firestore.FieldValue.arrayRemove(this.idProject),
+                });
+
+              firestore()
+                .collection('Projects')
+                .doc(this.idProject)
+                .update({
+                  members: firestore.FieldValue.arrayRemove(currentMember),
+                });
+              this.props.navigation.goBack();
+            }
+          },
         },
       ],
     );
   };
 
   render() {
-    const {project, rowRepository, source, resizeMode} = this.state;
+    const {
+      project,
+      rowRepository,
+      source,
+      resizeMode,
+      currentMember,
+    } = this.state;
     const {navigation} = this.props;
 
     return (
@@ -177,7 +212,11 @@ export default class ProjectScreen extends Component {
                   </View>
                 }
                 destructiveIndex={1}
-                options={['Edit Project', 'Member', 'Delete Project']}
+                options={[
+                  'Edit Project',
+                  'Member',
+                  currentMember.admin ? 'Delete Project' : 'Leave Project',
+                ]}
                 actions={[
                   this.editProject,
                   this.showMember,

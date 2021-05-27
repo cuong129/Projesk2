@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   Container,
   Header,
@@ -14,9 +14,9 @@ import {
   Right,
 } from 'native-base';
 
-import { Image, StyleSheet, View, FlatList, ScrollView } from 'react-native';
-import { colors, ColorBoard } from '../res/colors';
-import { wrap } from 'underscore';
+import {Image, StyleSheet, View, FlatList, ScrollView} from 'react-native';
+import {colors, ColorBoard} from '../res/colors';
+import {wrap} from 'underscore';
 
 export default class TaskItem extends Component {
   constructor(props) {
@@ -25,8 +25,7 @@ export default class TaskItem extends Component {
   renderChecklist(checklist) {
     var numChecked = 0;
     for (var i = 0; i < checklist.length; i++) {
-      if (checklist[i].hasChecked)
-        numChecked++;
+      if (checklist[i].hasChecked) numChecked++;
     }
     return numChecked + '/' + checklist.length;
   }
@@ -35,7 +34,7 @@ export default class TaskItem extends Component {
     startDate.setSeconds(0);
     var endDate = new Date(end.toDate());
     endDate.setSeconds(0);
-    return Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
+    return Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
   }
   hourDiff(start, end) {
     var startDate = new Date(start.toDate());
@@ -61,16 +60,19 @@ export default class TaskItem extends Component {
     return str1 + ' ' + str2 + ' ' + str3;
   }
   formatDate(date) {
-    var hour = date.getHours()
-    var minute = date.getMinutes()
-    if (hour < 10)
-      hour = '0' + hour
-    if (minute < 10)
-      minute = '0' + minute
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ` + hour + ':' + minute;
+    var hour = date.getHours();
+    var minute = date.getMinutes();
+    if (hour < 10) hour = '0' + hour;
+    if (minute < 10) minute = '0' + minute;
+    return (
+      `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ` +
+      hour +
+      ':' +
+      minute
+    );
   }
   render() {
-    const { item } = this.props;
+    const {item} = this.props;
     return (
       <Card>
         <CardItem>
@@ -79,59 +81,81 @@ export default class TaskItem extends Component {
               <Text>{item.name}</Text>
               <Text note>{item.note}</Text>
               {item.complete != null && item.complete.hasCompleted && (
-                <View style={{ flexDirection: 'row' }}>
-                  <Text style={{
-                    color: item.complete.date <= item.DueDate ? colors.Positive : colors.Danger,
-                    fontSize: 14
-                  }}>
-                    {this.renderCompleteTime(item.StartDate, item.complete.date)}
+                <View style={{flexDirection: 'row'}}>
+                  <Text
+                    style={{
+                      color:
+                        item.complete.date <= item.DueDate
+                          ? colors.Positive
+                          : colors.Danger,
+                      fontSize: 14,
+                    }}>
+                    {this.renderCompleteTime(
+                      item.StartDate,
+                      item.complete.date,
+                    )}
                   </Text>
-                  <Text style={{ fontSize: 14 }}>{' / ' + this.renderCompleteTime(item.StartDate, item.DueDate)}</Text>
-                </View>)
-              }
+                  <Text style={{fontSize: 14}}>
+                    {' / ' +
+                      this.renderCompleteTime(item.StartDate, item.DueDate)}
+                  </Text>
+                </View>
+              )}
             </Body>
           </Left>
         </CardItem>
         <View style={styles.cardItem}>
           <FlatList
-            columnWrapperStyle={{ flexWrap: 'wrap' }}
+            columnWrapperStyle={{flexWrap: 'wrap'}}
             numColumns={5}
             data={item.assigns}
-            renderItem={({ item }) => <Image style={styles.imageCircle} source={{uri: item.photoURL}}/>}
+            renderItem={({item}) => (
+              <Image style={styles.imageCircle} source={{uri: item.photoURL}} />
+            )}
             keyExtractor={item => item.uid}
           />
           {item.tag != null && (
             <FlatList
-              columnWrapperStyle={{ flexWrap: 'wrap' }}
+              columnWrapperStyle={{flexWrap: 'wrap'}}
               numColumns={4}
               data={item.tag}
-              renderItem={({ item }) => (
-                <View style={[styles.tag, { backgroundColor: ColorBoard[item.colorIndex] }]}>
+              renderItem={({item}) => (
+                <View
+                  style={[
+                    styles.tag,
+                    {backgroundColor: ColorBoard[item.colorIndex]},
+                  ]}>
                   <Text style={styles.titleTag}>{item.name}</Text>
                 </View>
               )}
               keyExtractor={item => item.id}
-            />)}
+            />
+          )}
         </View>
         <CardItem bordered footer>
           <Left>
             <View style={styles.chatbox}>
-              <Icon name="chatbox" style={{ color: '#58B6FF', fontSize: 20 }} />
-              <Text note>12</Text>
+              <Icon name="chatbox" style={{color: '#58B6FF', fontSize: 20}} />
+              <Text note>{item.comments ? item.comments.length : 0}</Text>
             </View>
             {item.checklist != null && (
               <View style={styles.checkBox}>
                 <Icon
                   name="checkbox-sharp"
-                  style={{ color: '#49CC87', fontSize: 20 }}
+                  style={{color: '#49CC87', fontSize: 20}}
                 />
                 <Text note>{this.renderChecklist(item.checklist)}</Text>
-              </View>)}
+              </View>
+            )}
             {item.DueDate != null && (
               <View style={styles.checkBox}>
-                <Icon name="calendar" style={{ color: '#FFC845', fontSize: 20 }} />
+                <Icon
+                  name="calendar"
+                  style={{color: '#FFC845', fontSize: 20}}
+                />
                 <Text note>{this.formatDate(item.DueDate.toDate())}</Text>
-              </View>)}
+              </View>
+            )}
           </Left>
         </CardItem>
       </Card>
