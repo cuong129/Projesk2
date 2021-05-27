@@ -200,10 +200,8 @@ export default class ProjectScreen extends Component {
   onOpen(item, columnIndex, index) {
     this.props.navigation.navigate('Task', {
       idProject: this.idProject,
-      task: item,
       columnIndex: columnIndex,
       index: index,
-      tasks: this.state.project.tasks,
     });
   }
 

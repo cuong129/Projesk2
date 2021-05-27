@@ -59,15 +59,26 @@ export default class TaskScreen extends Component {
       selectedIDTagItem: '',
       completeBtn: 'COMPLETE',
       completeDetail: 'This task is active',
+      tasks: [{rows: [{name: ''}]}],
     }
     this.currentUser = auth().currentUser;
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    this.initValue();
+    const { idProject, columnIndex, index } = this.props.route.params;
+    firestore()
+    .collection('Projects')
+    .doc(idProject)
+    .get()
+    .then(documentSnapshot => {
+      this.setState({tasks : documentSnapshot.data().tasks});
+      this.initValue();
+    
+    })
   }
   initValue() {
-    const task = this.props.route.params.task;
+    const {columnIndex, index} = this.props.route.params;
+    const task = this.state.tasks[columnIndex].rows[index];
     this.setState({
       taskName: task.name,
       taskNote: task.note,
@@ -194,12 +205,13 @@ export default class TaskScreen extends Component {
     firestore()
       .collection("Projects")
       .doc(this.props.route.params.idProject)
-      .set({
+      .update({
         tasks: tasks,
       });
   }
   handleUpdateTask = () => {
-    const { tasks, columnIndex, index } = this.props.route.params;
+    const {columnIndex, index } = this.props.route.params;
+    const {tasks} = this.state;
     const { taskName, taskNote, arrChecklist, arrTaglist, date, hasDateSelected } = this.state;
     var newTasks = tasks;
     newTasks[columnIndex].rows[index].name = taskName;
@@ -207,22 +219,21 @@ export default class TaskScreen extends Component {
     newTasks[columnIndex].rows[index].tag = arrTaglist.length > 0 ? arrTaglist : null;
     newTasks[columnIndex].rows[index].checklist = arrChecklist.length > 0 ? arrChecklist : null;
     newTasks[columnIndex].rows[index].DueDate = hasDateSelected ? firestore.Timestamp.fromDate(date) : null;
-    console.log(newTasks[columnIndex].rows[index].date);
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   }
 
   handleDeleteTask = () => {
-    const { tasks, columnIndex, index } = this.props.route.params;
-    var newTasks = tasks;
+    const { columnIndex, index } = this.props.route.params;
+    var newTasks = this.state.tasks;
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   }
 
   handlePressComplete = () => {
-    const { tasks, columnIndex, index } = this.props.route.params;
-    var newTasks = tasks;
+    const {columnIndex, index } = this.props.route.params;
+    var newTasks = this.state.tasks;
     if (this.state.completeBtn === 'COMPLETE') {
       var date = new Date();
       var detail = 'Completed by\n' + this.currentUser.displayName + '\n' + this.formatDate(date);
