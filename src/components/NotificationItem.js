@@ -9,6 +9,9 @@ export default class NotificationItem extends Component {
     super(props);
     this.state = {
       project: {},
+      detail: '',
+      iconName: 'reload',
+      iconColor: colors.Primary,
     };
   }
   componentDidMount() {
@@ -17,32 +20,45 @@ export default class NotificationItem extends Component {
       .collection('Projects')
       .doc(item.idProject)
       .get()
-      .then(documentSnapshot => this.setState({project: documentSnapshot.data()}));
+      .then(documentSnapshot => {
+        this.setState({ project: documentSnapshot.data() });
+        this.initValue();
+      });
+  }
+  initValue() {
+    const { item } = this.props;
+    const { project } = this.state;
+    if (item.type === 'invite') {
+      this.setState({
+        detail: "invited you to project ",
+        iconName: "ios-person-add",
+        iconColor: colors.Primary,
+      });
+    } else if (item.type === 'remove') {
+      this.setState({
+        detail: "removed you from project ",
+        iconName: "ios-person-remove",
+        iconColor: ColorBoard[1],
+      });
+    } else if (item.type === 'assign') {
+      this.setState({
+        detail: "assigned you to task ",
+        iconName: "star",
+        iconColor: ColorBoard[2],
+      });
+    } else if (item.type === 'deadline') {
+      this.setState({
+        detail: "Your task ",
+        iconName: "calendar",
+        iconColor: ColorBoard[0],
+      });
+    }
   }
   render() {
     const { item, onPressItem } = this.props;
-    const { project } = this.state;
-    var detail, iconName, iconColor;
-    if (item.type === 'invite') {
-      detail = "invited you to project ";
-      iconName = "ios-person-add";
-      iconColor = colors.Primary;
-   
-    } else if (item.type === 'remove') {
-      detail = "removed you from project ";
-      iconName = "ios-person-remove";
-      iconColor = ColorBoard[1];
-    } else if (item.type === 'assign') {
-      detail = "assigned you to task ";
-      iconName = "star";
-      iconColor = ColorBoard[2];
-    } else if (item.type === 'deadline') {
-      detail = "Your task ";
-      iconName = "calendar";
-      iconColor = ColorBoard[0];
-    }
+    const { detail, iconName, iconColor, project } = this.state;
     return (
-      <TouchableOpacity style={styles.container} onPress={() => {onPressItem(item.id)}}>
+      <TouchableOpacity style={styles.container} onPress={() => { onPressItem(item.id) }}>
         <View style={{ padding: 10, paddingRight: 20, }}>
           <Image
             style={styles.imageCircle}
@@ -84,11 +100,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 40,
     top: 40,
+    borderRadius: 20,
     alignSelf: 'center',
     height: 30,
     width: 30,
-
-    borderRadius: 15,
   },
   iconStyle: {
     fontSize: 16,

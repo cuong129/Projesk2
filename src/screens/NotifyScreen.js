@@ -29,6 +29,8 @@ export default class NotifyScreen extends Component {
         photoURL: this.currentUser.photoURL,
         type: 'deadline',
         idProject: "vBIgMBoaNgZlNNUqLIj9",
+        columnIndex: 0,
+        index: 0,
       },
       {
         id: 4,
@@ -36,12 +38,23 @@ export default class NotifyScreen extends Component {
         photoURL: this.currentUser.photoURL,
         type: 'assign',
         idProject: "vBIgMBoaNgZlNNUqLIj9",
+        columnIndex: 0,
+        index: 0,
       }]
     }
   }
   handlePressItem = (id) => {
-    const index = this.state.arrNoti.findIndex(item => item.id === id);
+    const {arrNoti} = this.state;
+    const index = arrNoti.findIndex(item => item.id === id);
     if (arrNoti[index].type === 'invite') {
+      this.props.navigation.navigate('Project', {
+        screen: 'ProjectMain',
+        params: {
+          idProject: arrNoti[index].idProject,
+        },
+      })
+    } 
+    else if (arrNoti[index].type === 'assign' || arrNoti[index].type === 'deadline') {
 
     }
   }
@@ -56,7 +69,8 @@ export default class NotifyScreen extends Component {
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <NotificationItem
-                item={item} />
+                item={item}
+                onPressItem={this.handlePressItem} />
             )}
           />
       </Container>
