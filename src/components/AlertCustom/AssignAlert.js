@@ -16,8 +16,8 @@ import {colors} from '../../res/colors';
 import {typeAlert} from '.';
 
 const AssignAlert = ({screen}) => {
-  const props = screen.props.route.params;
-  const assignList = screen.state.arrAssign;
+  const {members, arrAssign} = screen.state;
+  const assignList = arrAssign;
   const [assigns, setAssigns] = useState(assignList);
 
   const doneAssign = () => {
@@ -63,7 +63,7 @@ const AssignAlert = ({screen}) => {
       componentBody={
         <View>
           <FlatList
-            data={props.members}
+            data={members}
             renderItem={({item, index}) => (
               <View style={{marginVertical: 10}}>
                 <ListItem avatar onPress={() => addAssign(item)}>

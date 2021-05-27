@@ -67,6 +67,7 @@ export default class TaskScreen extends Component {
       tasks: [{rows: [{name: ''}]}],
       alert: typeAlert.NONE,
       arrAssign: [],
+      members: [],
     };
     this.currentUser = auth().currentUser;
   }
@@ -78,9 +79,10 @@ export default class TaskScreen extends Component {
     .doc(idProject)
     .get()
     .then(documentSnapshot => {
-      this.setState({tasks : documentSnapshot.data().tasks});
-      this.initValue();
-    
+      if(!documentSnapshot.exists) return
+      const data = documentSnapshot.data();
+      this.setState({tasks : data.tasks, members: data.members});
+      this.initValue(); 
     })
   }
   initValue() {

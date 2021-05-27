@@ -244,7 +244,6 @@ export default class ProjectScreen extends Component {
       idProject: this.idProject,
       columnIndex: columnIndex,
       index: index,
-      members: members,
     });
   }
 
