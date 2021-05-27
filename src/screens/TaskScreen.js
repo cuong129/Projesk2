@@ -29,6 +29,7 @@ import {
   Platform,
   StatusBar,
   ActivityIndicatorComponent,
+  Image,
 } from 'react-native';
 import {colors, ColorBoard} from '../res/colors';
 import ChecklistItem from '../components/ChecklistItem';
