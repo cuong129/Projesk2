@@ -242,10 +242,8 @@ export default class ProjectScreen extends Component {
     const {tasks, members} = this.state.project;
     this.props.navigation.navigate('Task', {
       idProject: this.idProject,
-      task: item,
       columnIndex: columnIndex,
       index: index,
-      tasks: tasks,
       members: members,
     });
   }

@@ -64,6 +64,7 @@ export default class TaskScreen extends Component {
       selectedIDTagItem: '',
       completeBtn: 'COMPLETE',
       completeDetail: 'This task is active',
+      tasks: [{rows: [{name: ''}]}],
       alert: typeAlert.NONE,
       arrAssign: [],
     };
@@ -71,10 +72,20 @@ export default class TaskScreen extends Component {
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    this.initValue();
+    const { idProject, columnIndex, index } = this.props.route.params;
+    firestore()
+    .collection('Projects')
+    .doc(idProject)
+    .get()
+    .then(documentSnapshot => {
+      this.setState({tasks : documentSnapshot.data().tasks});
+      this.initValue();
+    
+    })
   }
   initValue() {
-    const task = this.props.route.params.task;
+    const {columnIndex, index} = this.props.route.params;
+    const task = this.state.tasks[columnIndex].rows[index];
     this.setState({
       taskName: task.name,
       taskNote: task.note,
@@ -232,8 +243,9 @@ export default class TaskScreen extends Component {
       });
   }
   handleUpdateTask = () => {
-    const {tasks, columnIndex, index} = this.props.route.params;
+    const {columnIndex, index} = this.props.route.params;
     const {
+      tasks,
       taskName,
       taskNote,
       arrChecklist,
@@ -259,16 +271,16 @@ export default class TaskScreen extends Component {
   };
 
   handleDeleteTask = () => {
-    const {tasks, columnIndex, index} = this.props.route.params;
-    var newTasks = tasks;
+    const { columnIndex, index } = this.props.route.params;
+    var newTasks = this.state.tasks;
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   };
 
   handlePressComplete = () => {
-    const {tasks, columnIndex, index} = this.props.route.params;
-    var newTasks = tasks;
+    const {columnIndex, index } = this.props.route.params;
+    var newTasks = this.state.tasks;
     if (this.state.completeBtn === 'COMPLETE') {
       var date = new Date();
       var detail =
