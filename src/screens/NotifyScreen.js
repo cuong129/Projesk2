@@ -4,6 +4,8 @@ import { Container} from 'native-base';
 import { colors } from '../res/colors'
 import { auth } from '../firebase'
 import NotificationItem from '../components/NotificationItem';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+
 export default class NotifyScreen extends Component {
   constructor(props) {
     super(props);
@@ -61,6 +63,7 @@ export default class NotifyScreen extends Component {
   render() {
     return (
       <Container style={{ backgroundColor: colors.Background }}>
+          <FocusAwareStatusBar backgroundColor="white" barStyle="dark-content" />
         <View style={styles.titleView}>
           <Text style={styles.titleText}>Notifications</Text>
         </View>

@@ -67,6 +67,7 @@ export default class TaskScreen extends Component {
       tasks: [{rows: [{name: ''}]}],
       alert: typeAlert.NONE,
       arrAssign: [],
+      members: [],
     };
     this.currentUser = auth().currentUser;
   }
@@ -78,9 +79,10 @@ export default class TaskScreen extends Component {
     .doc(idProject)
     .get()
     .then(documentSnapshot => {
-      this.setState({tasks : documentSnapshot.data().tasks});
-      this.initValue();
-    
+      if(!documentSnapshot.exists) return
+      const data = documentSnapshot.data();
+      this.setState({tasks : data.tasks, members: data.members});
+      this.initValue(); 
     })
   }
   initValue() {
@@ -252,6 +254,7 @@ export default class TaskScreen extends Component {
       arrTaglist,
       date,
       hasDateSelected,
+      arrAssign,
     } = this.state;
     var newTasks = tasks;
     newTasks[columnIndex].rows[index].name = taskName;
@@ -263,6 +266,7 @@ export default class TaskScreen extends Component {
     newTasks[columnIndex].rows[index].DueDate = hasDateSelected
       ? firestore.Timestamp.fromDate(date)
       : null;
+    newTasks[columnIndex].rows[index].assigns = arrAssign;
     console.log(newTasks[columnIndex].rows[index].date);
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
@@ -647,8 +651,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#3773E1',
-    marginRight: 4,
-    marginTop: 4,
+    marginLeft: 8,
   },
 });
