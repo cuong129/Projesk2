@@ -17,19 +17,14 @@ import {typeAlert} from '.';
 
 const AssignAlert = ({screen}) => {
   const props = screen.props.route.params;
-  const assignList = props.task.assigns;
+  const assignList = screen.state.arrAssign;
   const [assigns, setAssigns] = useState(assignList);
 
   const doneAssign = () => {
-    // const newMembers = [...screen.state.members];
-    // newMembers[screen.state.index].admin = isAdmin;
-    // firestore().collection('Projects').doc(screen.idProject).update({
-    //   members: newMembers,
-    // });
-    // screen.setState({
-    //   members: newMembers,
-    //   alert: typeAlert.NONE,
-    // });
+    screen.setState({
+      arrAssign: assigns,
+      alert: typeAlert.NONE,
+    });
   };
 
   const addAssign = item => {
@@ -37,23 +32,26 @@ const AssignAlert = ({screen}) => {
     delete newAssign.name;
     delete newAssign.admin;
 
-    const newAssigns = [...assigns, newAssign];
+    const index = assigns.findIndex(element => element.uid == item.uid);
+    const newAssigns = [...assigns];
+
+    if (index != -1) newAssigns.splice(index, 1);
+    else newAssigns.push(newAssign);
     setAssigns(newAssigns);
   };
 
   const iconRight = item => {
-    assigns.forEach(element => {
-      if (element.uid == item.uid)
-        return (
-          <Icon
-            name="checkmark-sharp"
-            style={{
-              color: colors.Disable,
-              fontSize: 20,
-            }}
-          />
-        );
-    });
+    const found = assigns.find(element => element.uid == item.uid);
+    if (found)
+      return (
+        <Icon
+          name="checkmark-sharp"
+          style={{
+            color: colors.Disable,
+            fontSize: 20,
+          }}
+        />
+      );
   };
 
   return (
@@ -68,7 +66,7 @@ const AssignAlert = ({screen}) => {
             data={props.members}
             renderItem={({item, index}) => (
               <View style={{marginVertical: 10}}>
-                <ListItem avatar onPress={()=>addAssign(item)}>
+                <ListItem avatar onPress={() => addAssign(item)}>
                   <Left>
                     <Thumbnail source={{uri: item.photoURL}} small />
                   </Left>

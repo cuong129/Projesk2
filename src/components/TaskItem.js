@@ -21,24 +21,6 @@ import { wrap } from 'underscore';
 export default class TaskItem extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      assigns: [
-        {
-          id: 1,
-        },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 },
-      ],
-      tags: [
-        {
-          id: 1,
-        },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 },
-      ],
-    };
   }
   renderChecklist(checklist) {
     var numChecked = 0;
@@ -114,10 +96,9 @@ export default class TaskItem extends Component {
           <FlatList
             columnWrapperStyle={{ flexWrap: 'wrap' }}
             numColumns={5}
-            data={this.state.assigns}
-            renderItem={({ item }) => <Image style={styles.imageCircle} />}
-            keyExtractor={item => item.id}
-            listKey={(item, index) => 'D' + index.toString()}
+            data={item.assigns}
+            renderItem={({ item }) => <Image style={styles.imageCircle} source={{uri: item.photoURL}}/>}
+            keyExtractor={item => item.uid}
           />
           {item.tag != null && (
             <FlatList

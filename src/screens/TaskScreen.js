@@ -29,6 +29,7 @@ import {
   Platform,
   StatusBar,
   ActivityIndicatorComponent,
+  Image,
 } from 'react-native';
 import {colors, ColorBoard} from '../res/colors';
 import ChecklistItem from '../components/ChecklistItem';
@@ -239,6 +240,7 @@ export default class TaskScreen extends Component {
       arrTaglist,
       date,
       hasDateSelected,
+      arrAssign,
     } = this.state;
     var newTasks = tasks;
     newTasks[columnIndex].rows[index].name = taskName;
@@ -250,6 +252,7 @@ export default class TaskScreen extends Component {
     newTasks[columnIndex].rows[index].DueDate = hasDateSelected
       ? firestore.Timestamp.fromDate(date)
       : null;
+    newTasks[columnIndex].rows[index].assigns = arrAssign;
     console.log(newTasks[columnIndex].rows[index].date);
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
@@ -634,8 +637,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#3773E1',
-    marginRight: 4,
-    marginTop: 4,
+    marginLeft: 8,
   },
 });
