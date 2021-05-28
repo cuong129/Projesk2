@@ -16,12 +16,13 @@ import {
   ListItem,
   CheckBox,
   StyleProvider,
+  Thumbnail,
+  Text,
 } from 'native-base';
 import {
   FlatList,
   StyleSheet,
   View,
-  Text,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -30,6 +31,7 @@ import {
   StatusBar,
   ActivityIndicatorComponent,
   Image,
+  Keyboard,
 } from 'react-native';
 import { colors, ColorBoard } from '../res/colors';
 import ChecklistItem from '../components/ChecklistItem';
@@ -43,6 +45,7 @@ import TagItem from '../components/TagItem';
 import TagColorBoard from '../components/TagColorBoard';
 import { auth, firestore, addDeadlineNoti, addAssignNoti, deleteAssignNoti, deleteDeadlineNoti } from '../firebase';
 import { typeAlert, AssignAlert } from '../components/AlertCustom';
+import FormatPeriodTime from '../utility/FormatPeriodTime'
 
 export default class TaskScreen extends Component {
   constructor(props) {
@@ -68,33 +71,39 @@ export default class TaskScreen extends Component {
       alert: typeAlert.NONE,
       arrAssign: [],
       members: [],
-      oldDueDate: new Date(),
       oldArrAssign: [],
+      arrComment: [],
     };
     this.currentUser = auth().currentUser;
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    const { idProject, columnIndex, index } = this.props.route.params;
+    const {idProject, columnIndex, index} = this.props.route.params;
     firestore()
       .collection('Projects')
       .doc(idProject)
       .get()
       .then(documentSnapshot => {
-        if (!documentSnapshot.exists) return
+        if (!documentSnapshot.exists) return;
         const data = documentSnapshot.data();
-        this.setState({ tasks: data.tasks, members: data.members });
+        this.setState({tasks: data.tasks, members: data.members});
         this.initValue();
-      })
+      });
   }
   initValue() {
     const { columnIndex, index } = this.props.route.params;
     const task = this.state.tasks[columnIndex].rows[index];
+
+    const newArrComment = [...task.comments];
+    newArrComment.sort((firstEl, secondEl) => {
+      return secondEl.time - firstEl.time;
+    });
     this.setState({
       taskName: task.name,
       taskNote: task.note,
       arrAssign: task.assigns,
       oldArrAssign: task.assigns,
+      arrComment: newArrComment,
     });
     if (task.checklist != null) this.setState({ arrChecklist: task.checklist });
     if (task.tag != null) this.setState({ arrTaglist: task.tag });
@@ -103,7 +112,6 @@ export default class TaskScreen extends Component {
         date: new Date(task.DueDate.toDate()),
         time: new Date(task.DueDate.toDate()),
         hasDateSelected: true,
-        oldDueDate: new Date(task.DueDate.toDate()),
       });
     }
     if (task.complete != null) {
@@ -311,7 +319,7 @@ export default class TaskScreen extends Component {
   };
 
   handleDeleteTask = () => {
-    const { columnIndex, index } = this.props.route.params;
+    const {columnIndex, index} = this.props.route.params;
     var newTasks = this.state.tasks;
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
@@ -352,8 +360,7 @@ export default class TaskScreen extends Component {
   };
 
   render() {
-    const { arrAssign } = this.state;
-
+    const {arrAssign, arrComment} = this.state;
     const showAlert = () => {
       if (this.state.alert == typeAlert.ASSIGN)
         return <AssignAlert screen={this} />;
@@ -467,7 +474,7 @@ export default class TaskScreen extends Component {
                 {renderAssignBtn()}
               </TouchableOpacity>
             </Item>
-            <Item>
+            <Item style={{marginBottom: 10}}>
               <TouchableOpacity
                 style={styles.button}
                 onPress={this.showDatepicker}>
@@ -634,11 +641,98 @@ export default class TaskScreen extends Component {
                 />
               </TouchableOpacity>
             </Item>
+
+            {/* comment */}
+            <View style={{backgroundColor: 'white'}}>
+              <Text style={styles.title}>Conversations</Text>
+              <Item style={{paddingHorizontal: 10}}>
+                <Input
+                  placeholder="Add Comment"
+                  onChangeText={text => (this.content = text)}
+                  value={this.content}
+                />
+                <Icon
+                  active
+                  name="send-sharp"
+                  style={{color: colors.Primary}}
+                  onPress={() => this.sendComment()}
+                />
+              </Item>
+              <FlatList
+                data={arrComment}
+                keyExtractor={item => item.time}
+                renderItem={({item, index}) => (
+                  <ListItem avatar noBorder>
+                    <Left>
+                      <Thumbnail source={{uri: item.photoURL}} small />
+                    </Left>
+                    <Body>
+                      <View style={styles.commentHeader}>
+                        <View>
+                          <Text note>{FormatPeriodTime(item.time)}</Text>
+                          <Text>{item.name}</Text>
+                        </View>
+                        <View style={{flexDirection: 'row'}}>
+                          <Icon
+                            name="insert-emoticon"
+                            type="MaterialIcons"
+                            style={{
+                              color: '#01A5F4',
+                              marginRight: 20,
+                              fontSize: 25,
+                            }}
+                          />
+                          <Icon
+                            name="chat-remove-outline"
+                            type="MaterialCommunityIcons"
+                            style={{color: colors.Danger, fontSize: 25}}
+                            onPress={() => this.deleteComment(index)}
+                          />
+                        </View>
+                      </View>
+                      <Text style={styles.contentComment}>{item.content}</Text>
+                    </Body>
+                    <Right></Right>
+                  </ListItem>
+                )}
+              />
+            </View>
           </Content>
           {showAlert()}
         </Container>
       </StyleProvider>
     );
+  }
+
+  sendComment() {
+    if (!this.content || this.content.trim() == '') return;
+    const newComment = {
+      name: this.currentUser.displayName,
+      photoURL: this.currentUser.photoURL,
+      time: Date.now(),
+      content: this.content,
+    };
+
+    const newArrComment = [...this.state.arrComment];
+    newArrComment.unshift(newComment);
+    this.content = '';
+    Keyboard.dismiss();
+    this.updateCommand(newArrComment);
+  }
+
+  deleteComment(index) {
+    const newArrComment = [...this.state.arrComment];
+    newArrComment.splice(index, 1);
+    this.updateCommand(newArrComment);
+  }
+
+  updateCommand(newArrComment) {
+    const {columnIndex, index} = this.props.route.params;
+    var newTasks = this.state.tasks;
+
+    newTasks[columnIndex].rows[index].comments = newArrComment;
+    this.UpdateTasks(newTasks);
+    this.setState({arrComment: newArrComment});
   }
 }
 
@@ -673,7 +767,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 15,
     backgroundColor: '#fff',
-    marginTop: 15,
     color: colors.Primary,
   },
   tagInput: {
@@ -690,5 +783,18 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     marginLeft: 8,
+  },
+  contentComment: {
+    backgroundColor: '#E4E6EB',
+    color: '#494949',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 10,
   },
 });
