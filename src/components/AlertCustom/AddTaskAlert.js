@@ -36,7 +36,6 @@ const AddTaskAlert = ({screen}) => {
         name: inputName,
         note: inputNote,
         StartDate: new Date(),
-        assigns: [],
       };
       const props = screen.props;
       let newTasks = [...props.tasks];

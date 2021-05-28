@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Container,
   Header,
@@ -14,11 +14,11 @@ import {
   Thumbnail,
   Fab,
 } from 'native-base';
-import {StatusBar, StyleSheet, View, FlatList, Alert} from 'react-native';
+import { StatusBar, StyleSheet, View, FlatList, Alert } from 'react-native';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
-import {colors} from '../res/colors';
-import {auth, firestore} from '../firebase';
+import { colors } from '../res/colors';
+import { auth, firestore, updateProjectNoti, addProjectNoti } from '../firebase';
 import {
   typeAlert,
   AddMemberAlert,
@@ -45,7 +45,7 @@ export default class MemberScreen extends Component {
       element => element.uid == this.currentUser.uid,
     );
 
-    if (found) this.setState({admin: found.admin});
+    if (found) this.setState({ admin: found.admin });
   }
 
   showAlert() {
@@ -72,7 +72,7 @@ export default class MemberScreen extends Component {
           const newMembers = [...this.state.members];
           newMembers.splice(index, 1);
 
-          this.setState({members: newMembers});
+          this.setState({ members: newMembers });
 
           firestore()
             .collection('Projects')
@@ -87,14 +87,16 @@ export default class MemberScreen extends Component {
             .update({
               myProjects: firestore.FieldValue.arrayRemove(this.idProject),
             });
+          //add noti remove + delete noti invite
+          updateProjectNoti(item.uid, this.currentUser, this.idProject);
         },
       },
     ]);
   }
 
   render() {
-    const {navigation} = this.props;
-    const {admin, members} = this.state;
+    const { navigation } = this.props;
+    const { admin, members } = this.state;
 
     const iconRight = (item, index) => {
       if (!admin) return;
@@ -117,13 +119,13 @@ export default class MemberScreen extends Component {
             }
           />
           <Icon
-            name="delete-outline"
+            name="person-remove-sharp"
             style={{
               color: colors.Danger,
               fontSize: 24,
               marginLeft: 20,
             }}
-            type="MaterialCommunityIcons"
+            type="Ionicons"
             onPress={() => {
               this.deleteMember(item, index);
             }}
@@ -136,7 +138,7 @@ export default class MemberScreen extends Component {
       <StyleProvider style={getTheme(material)}>
         <Container>
           <StatusBar translucent={false} />
-          <Header style={{backgroundColor: colors.Primary}}>
+          <Header style={{ backgroundColor: colors.Primary }}>
             <Left>
               <Button transparent onPress={() => navigation.goBack()}>
                 <Icon name="arrow-back" />
@@ -149,10 +151,10 @@ export default class MemberScreen extends Component {
           </Header>
           <FlatList
             data={members}
-            renderItem={({item, index}) => (
+            renderItem={({ item, index }) => (
               <ListItem avatar>
                 <Left>
-                  <Thumbnail source={{uri: item.photoURL}} small />
+                  <Thumbnail source={{ uri: item.photoURL }} small />
                 </Left>
                 <Body>
                   <Text>{item.name}</Text>
@@ -165,9 +167,9 @@ export default class MemberScreen extends Component {
           />
           {this.showAlert()}
           <Fab
-            style={{backgroundColor: colors.Positive}}
-            onPress={() => this.setState({alert: typeAlert.ADD_MEMBER})}>
-            <Icon name="person-add" type="MaterialIcons"/>
+            style={{ backgroundColor: colors.Positive }}
+            onPress={() => this.setState({ alert: typeAlert.ADD_MEMBER })}>
+            <Icon name="person-add" type="MaterialIcons" />
           </Fab>
         </Container>
       </StyleProvider>

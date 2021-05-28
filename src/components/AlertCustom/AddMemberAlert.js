@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import AlertView from './AlertView';
 import {Input, Item, Icon, Text} from 'native-base';
 import {View} from 'react-native';
-import {firestore} from '../../firebase';
+import {auth, firestore, addProjectNoti} from '../../firebase';
 import {colors} from '../../res/colors';
 import {typeAlert} from '.';
 
@@ -59,13 +59,16 @@ const AddMemberAlert = ({screen}) => {
                 .update({
                   members: firestore.FieldValue.arrayUnion(newMember),
                 });
-
+              
+              const currentUser = auth().currentUser;
               firestore()
                 .collection('Users')
                 .doc(element.id)
                 .update({
-                  myProjects: firestore.FieldValue.arrayUnion(idProject),
+                  myProjects: firestore.FieldValue.arrayUnion(idProject)  
                 });
+              //add project noti
+              addProjectNoti(element.id, currentUser, 'invite', idProject);
             }
           });
         });
