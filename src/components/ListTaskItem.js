@@ -2,9 +2,13 @@ import React, {Component} from 'react';
 import {Icon, Text} from 'native-base';
 import {FlatList, StyleSheet, View, ScrollView, Alert} from 'react-native';
 import {colors} from '../res/colors';
-import {AddTaskAlert, typeAlert, ListTaskAlert} from '../components/AlertCustom/index';
+import {
+  AddTaskAlert,
+  typeAlert,
+  ListTaskAlert,
+} from '../components/AlertCustom/index';
 import OptionsMenu from 'react-native-options-menu';
-import {firestore} from '../firebase';
+import {firestore, auth, addActivity, typeActivity} from '../firebase';
 
 export default class ListTaskItem extends Component {
   constructor(props) {
@@ -12,6 +16,8 @@ export default class ListTaskItem extends Component {
     this.state = {
       alert: typeAlert.NONE,
     };
+
+    this.currentUser = auth().currentUser;
   }
 
   showAlert() {
@@ -38,15 +44,18 @@ export default class ListTaskItem extends Component {
           text: 'Yes',
           style: 'destructive',
           onPress: () => {
-            const newTasks =[...this.props.tasks]
-            newTasks.splice(this.props.index, 1);
+            const {tasks, index, idProject, columnTask} = this.props;
+            const newTasks = [...tasks];
+            newTasks.splice(index, 1);
 
-            firestore()
-              .collection('Projects')
-              .doc(this.props.idProject)
-              .update({
-                tasks: newTasks,
-              });
+            firestore().collection('Projects').doc(idProject).update({
+              tasks: newTasks,
+            });
+
+            //add activity
+            let content =
+              this.currentUser.displayName + ' delete list ' + columnTask.name;
+            addActivity(content, typeActivity.DELETE_LIST, idProject);
           },
         },
       ],
@@ -54,7 +63,7 @@ export default class ListTaskItem extends Component {
   };
 
   editList = () => {
-    this.setState({alert: typeAlert.EDIT_LIST})
+    this.setState({alert: typeAlert.EDIT_LIST});
   };
 
   render() {
@@ -76,7 +85,7 @@ export default class ListTaskItem extends Component {
                 <Icon name="ellipsis-vertical" style={styles.iconTop} />
               }
               destructiveIndex={1}
-              options={['Edit','Delete']}
+              options={['Edit', 'Delete']}
               actions={[this.editList, this.deleteList]}
             />
           </View>

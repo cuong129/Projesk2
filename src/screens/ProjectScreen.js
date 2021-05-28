@@ -30,7 +30,7 @@ import {
   ProjectAlert,
   typeAlert,
 } from '../components/AlertCustom/index';
-import {auth, firestore} from '../firebase';
+import {auth, firestore, addActivity, typeActivity} from '../firebase';
 import OptionsMenu from 'react-native-options-menu';
 
 export default class ProjectScreen extends Component {
@@ -131,8 +131,13 @@ export default class ProjectScreen extends Component {
   };
 
   showActivity = () => {
+    let arrActivity = [...this.state.project.activities];
+    arrActivity.sort((firstEl, secondEl) => {
+      return secondEl.time - firstEl.time;
+    });
+
     this.props.navigation.navigate('Activity', {
-      members: this.state.project.activities,
+      activities: arrActivity,
     });
   };
 
@@ -168,6 +173,10 @@ export default class ProjectScreen extends Component {
                   members: firestore.FieldValue.arrayRemove(currentMember),
                 });
               this.props.navigation.goBack();
+
+              //add activity
+              let content = this.currentUser.displayName + ' leave project';
+              addActivity(content, typeActivity.LEAVE_PROJECT, this.idProject);
             }
           },
         },
@@ -296,9 +305,21 @@ export default class ProjectScreen extends Component {
 
   onDragEnd(srcColumnId, destColumnId, item) {
     const newData = [...this.state.project.tasks];
-
     const row = {...item.row()};
     const indexOld = newData[srcColumnId].rows.indexOf(row);
+
+    if (srcColumnId != destColumnId) {
+      //add activity
+      let content =
+        this.currentUser.displayName +
+        ' move task ' +
+        row.name +
+        ' from list ' +
+        newData[srcColumnId].name +
+        ' to list ' +
+        newData[destColumnId].name;
+      addActivity(content, typeActivity.EDIT_TABLE, this.idProject);
+    }
 
     newData[srcColumnId].rows.splice(indexOld, 1);
     newData[destColumnId].rows.splice(item.index(), 0, row);

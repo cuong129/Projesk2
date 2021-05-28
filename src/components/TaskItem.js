@@ -128,7 +128,7 @@ export default class TaskItem extends Component {
                   <Text style={styles.titleTag}>{item.name}</Text>
                 </View>
               )}
-              keyExtractor={item => item.id}
+              listKey={item => item.id}
             />
           )}
         </View>

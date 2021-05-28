@@ -19,13 +19,10 @@ import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import {colors} from '../res/colors';
 import FormatPeriodTime from '../utility/FormatPeriodTime';
-import {typeActivity} from '../firebase';
 
 export default class ActivityScreen extends Component {
   constructor(props) {
     super(props);
-
-    this.activities = [{id: 1}, {id: 2}];
   }
 
   render() {
@@ -58,13 +55,20 @@ export default class ActivityScreen extends Component {
   }
 
   renderItem(item) {
-    const icon = iconActivities[item.type];
+    const activity = item.item;
+    const icon = iconActivities[activity.type];
     return (
       <View style={styles.item}>
-        <Icon name={icon.name} type={icon.type} style={{color: icon.color}} />
+        <View style={[styles.circle, {backgroundColor: icon.color}]}>
+          <Icon
+            name={icon.name}
+            type={icon.type}
+            style={{color: 'white', fontSize: 20}}
+          />
+        </View>
         <View style={styles.content}>
-          <Text note>{FormatPeriodTime(item.time)}</Text>
-          <Text>{item.content}</Text>
+          <Text note>{FormatPeriodTime(activity.time)}</Text>
+          <Text>{activity.content}</Text>
         </View>
       </View>
     );
@@ -77,9 +81,35 @@ const iconActivities = [
   {name: 'account-edit', type: 'MaterialCommunityIcons', color: colors.Warning},
   {name: 'folder-edit', type: 'MaterialCommunityIcons', color: colors.Warning},
   {name: 'logout', type: 'MaterialCommunityIcons', color: colors.Danger},
+  {
+    name: 'playlist-plus',
+    type: 'MaterialCommunityIcons',
+    color: colors.Primary,
+  },
+  {
+    name: 'playlist-remove',
+    type: 'MaterialCommunityIcons',
+    color: colors.Danger,
+  },
+  {
+    name: 'playlist-edit',
+    type: 'MaterialCommunityIcons',
+    color: colors.Warning,
+  },
   {name: 'table-edit', type: 'MaterialCommunityIcons', color: colors.Warning},
+  {name: 'note-add', type: 'MaterialIcons', color: colors.Primary},
   {name: 'file-edit', type: 'MaterialCommunityIcons', color: colors.Warning},
-  {name: 'clipboard-check', type: 'MaterialCommunityIcons', color: colors.Positive},
+  {name: 'page-delete', type: 'Foundation', color: colors.Danger},
+  {
+    name: 'checkmark-sharp',
+    type: 'Ionicons',
+    color: colors.Positive,
+  },
+  {
+    name: 'restore',
+    type: 'MaterialCommunityIcons',
+    color: colors.Disable,
+  },
 ];
 
 const styles = StyleSheet.create({
@@ -95,5 +125,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.Disable,
     paddingBottom: 10,
     flex: 1,
+  },
+  circle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -50,6 +50,8 @@ import {
   addAssignNoti,
   deleteAssignNoti,
   deleteDeadlineNoti,
+  addActivity,
+  typeActivity,
 } from '../firebase';
 import {typeAlert, AssignAlert} from '../components/AlertCustom';
 import FormatPeriodTime from '../utility/FormatPeriodTime';
@@ -283,16 +285,16 @@ export default class TaskScreen extends Component {
       oldArrAssign,
     } = this.state;
     var newTasks = tasks;
-    newTasks[columnIndex].rows[index].name = taskName;
-    newTasks[columnIndex].rows[index].note = taskNote;
-    newTasks[columnIndex].rows[index].tag =
-      arrTaglist.length > 0 ? arrTaglist : null;
-    newTasks[columnIndex].rows[index].checklist =
-      arrChecklist.length > 0 ? arrChecklist : null;
-    newTasks[columnIndex].rows[index].DueDate = hasDateSelected
-      ? firestore.Timestamp.fromDate(date)
-      : null;
-    newTasks[columnIndex].rows[index].assigns = arrAssign;
+    let task = newTasks[columnIndex].rows[index];
+    //add activity before update
+    this.addActivityUpdateTask(task, idProject);
+
+    task.name = taskName;
+    task.note = taskNote;
+    task.tag = arrTaglist.length > 0 ? arrTaglist : null;
+    task.checklist = arrChecklist.length > 0 ? arrChecklist : null;
+    task.DueDate = hasDateSelected ? firestore.Timestamp.fromDate(date) : null;
+    task.assigns = arrAssign;
 
     //update deadline noti if due date has changed
 
@@ -337,15 +339,23 @@ export default class TaskScreen extends Component {
   };
 
   handleDeleteTask = () => {
-    const {columnIndex, index} = this.props.route.params;
+    const {columnIndex, index, idProject} = this.props.route.params;
     var newTasks = this.state.tasks;
+
+    //add activity
+    let content =
+      this.currentUser.displayName +
+      ' delete task ' +
+      newTasks[columnIndex].rows[index].name;
+    addActivity(content, typeActivity.DELETE_TASK, idProject);
+
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   };
 
   handlePressComplete = () => {
-    const {columnIndex, index} = this.props.route.params;
+    const {columnIndex, index, idProject} = this.props.route.params;
     var newTasks = this.state.tasks;
     if (this.state.completeBtn === 'COMPLETE') {
       var date = new Date();
@@ -363,6 +373,13 @@ export default class TaskScreen extends Component {
         user: this.currentUser.displayName,
         date: firestore.Timestamp.fromDate(date),
       };
+
+      //add activity
+      let content =
+        this.currentUser.displayName +
+        ' complete task ' +
+        newTasks[columnIndex].rows[index].name;
+      addActivity(content, typeActivity.COMPLETE_TASK, idProject);
     } else {
       this.setState({
         completeDetail: 'This task is active',
@@ -373,6 +390,12 @@ export default class TaskScreen extends Component {
         user: null,
         date: null,
       };
+      //add activity
+      let content =
+        this.currentUser.displayName +
+        ' restore task ' +
+        newTasks[columnIndex].rows[index].name;
+      addActivity(content, typeActivity.RESTORE_TASK, idProject);
     }
     this.UpdateTasks(newTasks);
   };
@@ -764,11 +787,60 @@ export default class TaskScreen extends Component {
 
   updateCommand(newArrComment) {
     const {columnIndex, index} = this.props.route.params;
-    var newTasks = this.state.tasks;
+    let newTasks = this.state.tasks;
 
     newTasks[columnIndex].rows[index].comments = newArrComment;
-    this.setState({arrComment: newArrComment});
     this.UpdateTasks(newTasks);
+    this.setState({arrComment: newArrComment});
+  }
+
+  addActivityUpdateTask(task, idProject) {
+    const {
+      taskName,
+      taskNote,
+      arrChecklist,
+      arrTaglist,
+      date,
+      arrAssign,
+    } = this.state;
+
+    let content = '';
+    if (task.name != taskName)
+      content += '\nRename task from ' + task.name + ' to ' + taskName + '.';
+    if (task.note != taskNote)
+      content += '\nChange note from ' + task.note + ' to ' + taskNote + '.';
+    if (JSON.stringify(task.assigns) !== JSON.stringify(arrAssign)) {
+      content += '\nAssign task for ';
+      if (arrAssign.length == 0) content += 'no one';
+      else
+        arrAssign.forEach((e, index) => {
+          if (index == arrAssign.length - 1) content += e.name + '.';
+          else content += e.name + ', ';
+        });
+    }
+    const fromTime = this.formatDate(new Date(task.DueDate.toDate()));
+    const toTime = this.formatDate(date);
+    if (fromTime != toTime) {
+      content += '\nChange due date from ' + fromTime + ' to ' + toTime + '.';
+    }
+    if (JSON.stringify(task.tag) !== JSON.stringify(arrTaglist)) {
+      if (!task.tag && arrTaglist.length == 0);
+      else content += '\nEdit list tag.';
+    }
+    if (JSON.stringify(task.checklist) !== JSON.stringify(arrChecklist)) {
+      if (!task.checklist && arrChecklist.length == 0);
+      else content += '\nEdit checklist.';
+    }
+
+    if (content === '') return;
+    content =
+      this.currentUser.displayName +
+      ' edit detail task ' +
+      task.name +
+      ':' +
+      content;
+
+    addActivity(content, typeActivity.EDIT_TASK, idProject);
   }
 }
 

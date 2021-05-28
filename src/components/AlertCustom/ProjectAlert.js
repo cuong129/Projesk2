@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import AlertView from './AlertView';
 import {Input, Item, Icon} from 'native-base';
 import {View} from 'react-native';
-import {firestore, auth} from '../../firebase';
+import {firestore, auth, typeActivity, addActivity} from '../../firebase';
 import {ColorBoard} from '../../res/colors';
 import typeAlert from './TypeAlert';
 
@@ -57,6 +57,22 @@ const ProjectAlert = ({screen, type}) => {
   };
 
   const UpdateProject = () => {
+    //add activity
+    let content = '';
+    const project = screen.state.project;
+    if (project.name != inputName)
+      content +=
+        '\nRename project from ' + project.name + ' to ' + inputName + '.';
+    if (project.note != inputNote)
+      content +=
+        '\nChange note from ' + project.note + ' to ' + inputNote + '.';
+    if (project.photoURL != inputPhotoURL) content += '\nChange background.';
+    if (content === '') return;
+    else
+      content =
+        screen.currentUser.displayName + ' edit profile project:' + content;
+
+    addActivity(content, typeActivity.EDIT_PROJECT, screen.idProject);
     firestore().collection('Projects').doc(screen.idProject).update({
       name: inputName,
       note: inputNote,

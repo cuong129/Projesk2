@@ -3,7 +3,7 @@ import AlertView from './AlertView';
 import {Input, Item, Icon} from 'native-base';
 import {FlatList, View, Pressable} from 'react-native';
 import {ColorBoard} from '../../res/colors';
-import {firestore} from '../../firebase';
+import {firestore, typeActivity, addActivity} from '../../firebase';
 import typeAlert from './TypeAlert';
 
 const ListTaskAlert = ({screen, type}) => {
@@ -80,11 +80,35 @@ const ListTaskAlert = ({screen, type}) => {
       .update({
         tasks: firestore.FieldValue.arrayUnion(newList),
       });
+
+    //add activity
+    let content = screen.currentUser.displayName + ' add new list ' + inputText;
+    addActivity(content, typeActivity.ADD_LIST, screen.idProject);
   };
 
   const updateList = () => {
     const props = screen.props;
     let newTasks = [...props.tasks];
+    //add activity
+    let content = '';
+    if (newTasks[props.index].name != inputText)
+      content +=
+        '\nRename list from ' +
+        newTasks[props.index].name +
+        ' to ' +
+        inputText +
+        '.';
+    if (newTasks[props.index].color != ColorBoard[idSelectColor])
+      content += '\nChange color.';
+    if (content === '') return;
+    content =
+      screen.currentUser.displayName +
+      ' edit profile list ' +
+      newTasks[props.index].name +
+      ':' +
+      content;
+    addActivity(content, typeActivity.EDIT_LIST, props.idProject);
+
     newTasks[props.index].name = inputText;
     newTasks[props.index].color = ColorBoard[idSelectColor];
 

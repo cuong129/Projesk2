@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import AlertView from './AlertView';
 import {Input, Item, Icon, Text} from 'native-base';
 import {View} from 'react-native';
-import {firestore} from '../../firebase';
+import {firestore, typeActivity, addActivity} from '../../firebase';
 import {typeAlert} from '.';
 
 const AddTaskAlert = ({screen}) => {
@@ -32,18 +32,28 @@ const AddTaskAlert = ({screen}) => {
       return;
     }
     if (isEmptyInput == 1) {
+      const {tasks, index, idProject} = screen.props;
       let newRow = {
         name: inputName,
         note: inputNote,
         StartDate: new Date(),
       };
-      const props = screen.props;
-      let newTasks = [...props.tasks];
-      newTasks[props.index].rows.push(newRow);
+      let newTasks = [...tasks];
+      newTasks[index].rows.push(newRow);
 
-      firestore().collection('Projects').doc(props.idProject).update({
+      firestore().collection('Projects').doc(idProject).update({
         tasks: newTasks,
       });
+
+      //add activity
+      let content =
+        screen.currentUser.displayName +
+        ' add new task ' +
+        inputName +
+        ' to list ' +
+        newTasks[index].name;
+      addActivity(content, typeActivity.ADD_TASK, idProject);
+
       screen.setState({
         alert: typeAlert.NONE,
       });
