@@ -130,6 +130,12 @@ export default class ProjectScreen extends Component {
     });
   };
 
+  showActivity = () => {
+    this.props.navigation.navigate('Activity', {
+      members: this.state.project.activities,
+    });
+  };
+
   deleteProject = () => {
     const {currentMember} = this.state;
     const content = currentMember.admin ? 'delete' : 'leave';
@@ -215,11 +221,13 @@ export default class ProjectScreen extends Component {
                 options={[
                   'Edit Project',
                   'Member',
+                  'Activity',
                   currentMember.admin ? 'Delete Project' : 'Leave Project',
                 ]}
                 actions={[
                   this.editProject,
                   this.showMember,
+                  this.showActivity,
                   this.deleteProject,
                 ]}
               />

@@ -15,7 +15,7 @@ import {
 import {StatusBar} from 'react-native';
 import getTheme from './native-base-theme/components';
 import material from './native-base-theme/variables/material';
-import * as screen from './screens/index';
+import * as screen from './screens';
 import {auth, firestore} from './firebase';
 import {
   GoogleSignin,
@@ -192,6 +192,7 @@ function ProjectScreen() {
       <Project.Screen name="ProjectMain" component={screen.ProjectScreen} />
       <Project.Screen name="Task" component={screen.TaskScreen} />
       <Project.Screen name="Member" component={screen.MemberScreen} />
+      <Project.Screen name="Activity" component={screen.ActivityScreen} />
     </Project.Navigator>
   );
 }

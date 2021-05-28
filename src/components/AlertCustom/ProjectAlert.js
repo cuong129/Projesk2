@@ -157,7 +157,7 @@ const ProjectAlert = ({screen, type}) => {
           </Item>
           <Item error={isValidURL == -1} success={isValidURL == 1}>
             <Input
-              placeholder="Image url"
+              placeholder="Background url"
               onChangeText={onURLChange}
               value={inputPhotoURL}
             />
