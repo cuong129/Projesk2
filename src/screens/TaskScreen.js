@@ -78,7 +78,7 @@ export default class TaskScreen extends Component {
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    const {idProject, columnIndex, index} = this.props.route.params;
+    const { idProject, columnIndex, index } = this.props.route.params;
     firestore()
       .collection('Projects')
       .doc(idProject)
@@ -86,7 +86,7 @@ export default class TaskScreen extends Component {
       .then(documentSnapshot => {
         if (!documentSnapshot.exists) return;
         const data = documentSnapshot.data();
-        this.setState({tasks: data.tasks, members: data.members});
+        this.setState({ tasks: data.tasks, members: data.members });
         this.initValue();
       });
   }
@@ -94,16 +94,18 @@ export default class TaskScreen extends Component {
     const { columnIndex, index } = this.props.route.params;
     const task = this.state.tasks[columnIndex].rows[index];
 
-    const newArrComment = [...task.comments];
-    newArrComment.sort((firstEl, secondEl) => {
-      return secondEl.time - firstEl.time;
-    });
+    if (task.comments != null) {
+      var newArrComment = task.comments;
+      newArrComment.sort((firstEl, secondEl) => {
+        return secondEl.time - firstEl.time;
+      });
+      this.setState({arrComment : newArrComment})
+    }
     this.setState({
       taskName: task.name,
       taskNote: task.note,
       arrAssign: task.assigns,
       oldArrAssign: task.assigns,
-      arrComment: newArrComment,
     });
     if (task.checklist != null) this.setState({ arrChecklist: task.checklist });
     if (task.tag != null) this.setState({ arrTaglist: task.tag });
@@ -283,43 +285,40 @@ export default class TaskScreen extends Component {
 
 
     //update deadline noti if due date has changed
-
-
     //get list of changed Assign
-    // var oldArr = oldArrAssign;
-    // var newArr = arrAssign;
-    // if (oldArr.length > 0 && newArr.length > 0) {
-    //   var i = 0;
-    //   do {
-    //     var isChanged = true;
-    //     for (var j = 0; j < newArr.length; j++)
-    //       if (oldArr[i].uid === newArr[j].uid) {
-    //         oldArr.splice(i, 1);
-    //         newArr.splice(j, 1);
-    //         isChanged = false;
-    //         break;
-    //       }
-    //     if (isChanged)
-    //       i++;
-    //   } while (i < oldArr.length);
-    // }
-    // if (oldArr.length > 0 && newArr.length === 0) {
-    //   //delete assign and deadline noti of old Assign who has been unassigned
-    //   oldArr.forEach(user => {
-    //     deleteAssignNoti(user.uid, idProject, columnIndex, index);
-    //     //deleteDeadlineNoti(user.uid, idProject, columnIndex, index);
-    //   });
-    // }
-    console.log(arrAssign);
-    // arrAssign.forEach(user => {
-    //   addAssignNoti(newArr, user.uid, this.currentUser, idProject, columnIndex, index, date, hasDateSelected);
-    // });
+    const oldArr = [...oldArrAssign];
+    const newArr = [...arrAssign];
+    if (oldArr.length > 0 && newArr.length > 0) {
+      var i = 0;
+      do {
+        var isChanged = true;
+        for (var j = 0; j < newArr.length; j++)
+          if (oldArr[i].uid === newArr[j].uid) {
+            oldArr.splice(i, 1);
+            newArr.splice(j, 1);
+            isChanged = false;
+            break;
+          }
+        if (isChanged)
+          i++;
+      } while (i < oldArr.length);
+    }
+    if (oldArr.length > 0 && newArr.length === 0) {
+      //delete assign and deadline noti of old Assign who has been unassigned
+      oldArr.forEach(user => {
+        deleteAssignNoti(user.uid, idProject, columnIndex, index);
+        //deleteDeadlineNoti(user.uid, idProject, columnIndex, index);
+      });
+    }
+    arrAssign.forEach(user => {
+      addAssignNoti(newArr, user.uid, this.currentUser, idProject, columnIndex, index, date, hasDateSelected);
+    });
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   };
 
   handleDeleteTask = () => {
-    const {columnIndex, index} = this.props.route.params;
+    const { columnIndex, index } = this.props.route.params;
     var newTasks = this.state.tasks;
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
@@ -360,7 +359,7 @@ export default class TaskScreen extends Component {
   };
 
   render() {
-    const {arrAssign, arrComment} = this.state;
+    const { arrAssign, arrComment } = this.state;
     const showAlert = () => {
       if (this.state.alert == typeAlert.ASSIGN)
         return <AssignAlert screen={this} />;
@@ -474,7 +473,7 @@ export default class TaskScreen extends Component {
                 {renderAssignBtn()}
               </TouchableOpacity>
             </Item>
-            <Item style={{marginBottom: 10}}>
+            <Item style={{ marginBottom: 10 }}>
               <TouchableOpacity
                 style={styles.button}
                 onPress={this.showDatepicker}>
@@ -643,9 +642,9 @@ export default class TaskScreen extends Component {
             </Item>
 
             {/* comment */}
-            <View style={{backgroundColor: 'white'}}>
+            <View style={{ backgroundColor: 'white' }}>
               <Text style={styles.title}>Conversations</Text>
-              <Item style={{paddingHorizontal: 10}}>
+              <Item style={{ paddingHorizontal: 10 }}>
                 <Input
                   placeholder="Add Comment"
                   onChangeText={text => (this.content = text)}
@@ -654,17 +653,17 @@ export default class TaskScreen extends Component {
                 <Icon
                   active
                   name="send-sharp"
-                  style={{color: colors.Primary}}
+                  style={{ color: colors.Primary }}
                   onPress={() => this.sendComment()}
                 />
               </Item>
               <FlatList
                 data={arrComment}
                 keyExtractor={item => item.time}
-                renderItem={({item, index}) => (
+                renderItem={({ item, index }) => (
                   <ListItem avatar noBorder>
                     <Left>
-                      <Thumbnail source={{uri: item.photoURL}} small />
+                      <Thumbnail source={{ uri: item.photoURL }} small />
                     </Left>
                     <Body>
                       <View style={styles.commentHeader}>
@@ -672,7 +671,7 @@ export default class TaskScreen extends Component {
                           <Text note>{FormatPeriodTime(item.time)}</Text>
                           <Text>{item.name}</Text>
                         </View>
-                        <View style={{flexDirection: 'row'}}>
+                        <View style={{ flexDirection: 'row' }}>
                           <Icon
                             name="insert-emoticon"
                             type="MaterialIcons"
@@ -685,7 +684,7 @@ export default class TaskScreen extends Component {
                           <Icon
                             name="chat-remove-outline"
                             type="MaterialCommunityIcons"
-                            style={{color: colors.Danger, fontSize: 25}}
+                            style={{ color: colors.Danger, fontSize: 25 }}
                             onPress={() => this.deleteComment(index)}
                           />
                         </View>
@@ -727,12 +726,13 @@ export default class TaskScreen extends Component {
   }
 
   updateCommand(newArrComment) {
-    const {columnIndex, index} = this.props.route.params;
+    const { columnIndex, index } = this.props.route.params;
     var newTasks = this.state.tasks;
 
     newTasks[columnIndex].rows[index].comments = newArrComment;
+    this.setState({ arrComment: newArrComment });
     this.UpdateTasks(newTasks);
-    this.setState({arrComment: newArrComment});
+
   }
 }
 

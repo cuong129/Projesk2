@@ -171,13 +171,16 @@ function addAssignNoti(newArr, userID, currentUser, idProject, columnIndex, inde
     .then(documentSnapshot => {
       var arrNoti = documentSnapshot.data().notifications;
       // notify assign to new users 
-      //if (userID !== currentUser.uid && isNewUser(newArr, userID)) {
-        arrNoti = [...arrNoti, objDeadline, objAssign];
-      // if (!hasDateSelected) {  // delete old deadline noti if due date doesn't exist now
-      //   arrNoti = arrNoti.filter(item =>
-      //     !(item.idProject === idProject && (item.type === 'deadline')
-      //       && item.columnIndex === columnIndex && item.index === index));
-      // }
+      if (userID !== currentUser.uid && isNewUser(newArr, userID)) {
+        arrNoti = [...arrNoti, objAssign];
+      }
+       // delete old deadline noti if due date doesn't exist now
+      arrNoti = arrNoti.filter(item =>
+        !(item.idProject === idProject && (item.type === 'deadline')
+          && item.columnIndex === columnIndex && item.index === index));
+      if (hasDateSelected) { 
+        arrNoti = [...arrNoti, objDeadline];
+      }
       firestore()
         .collection('Users')
         .doc(userID)
