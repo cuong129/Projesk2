@@ -297,34 +297,41 @@ export default class TaskScreen extends Component {
     //update deadline noti if due date has changed
 
     //get list of changed Assign
-    // var oldArr = oldArrAssign;
-    // var newArr = arrAssign;
-    // if (oldArr.length > 0 && newArr.length > 0) {
-    //   var i = 0;
-    //   do {
-    //     var isChanged = true;
-    //     for (var j = 0; j < newArr.length; j++)
-    //       if (oldArr[i].uid === newArr[j].uid) {
-    //         oldArr.splice(i, 1);
-    //         newArr.splice(j, 1);
-    //         isChanged = false;
-    //         break;
-    //       }
-    //     if (isChanged)
-    //       i++;
-    //   } while (i < oldArr.length);
-    // }
-    // if (oldArr.length > 0 && newArr.length === 0) {
-    //   //delete assign and deadline noti of old Assign who has been unassigned
-    //   oldArr.forEach(user => {
-    //     deleteAssignNoti(user.uid, idProject, columnIndex, index);
-    //     //deleteDeadlineNoti(user.uid, idProject, columnIndex, index);
-    //   });
-    // }
-    console.log(arrAssign);
-    // arrAssign.forEach(user => {
-    //   addAssignNoti(newArr, user.uid, this.currentUser, idProject, columnIndex, index, date, hasDateSelected);
-    // });
+    const oldArr = [...oldArrAssign];
+    const newArr = [...arrAssign];
+    if (oldArr.length > 0 && newArr.length > 0) {
+      var i = 0;
+      do {
+        var isChanged = true;
+        for (var j = 0; j < newArr.length; j++)
+          if (oldArr[i].uid === newArr[j].uid) {
+            oldArr.splice(i, 1);
+            newArr.splice(j, 1);
+            isChanged = false;
+            break;
+          }
+        if (isChanged) i++;
+      } while (i < oldArr.length);
+    }
+    if (oldArr.length > 0 && newArr.length === 0) {
+      //delete assign and deadline noti of old Assign who has been unassigned
+      oldArr.forEach(user => {
+        deleteAssignNoti(user.uid, idProject, columnIndex, index);
+        //deleteDeadlineNoti(user.uid, idProject, columnIndex, index);
+      });
+    }
+    arrAssign.forEach(user => {
+      addAssignNoti(
+        newArr,
+        user.uid,
+        this.currentUser,
+        idProject,
+        columnIndex,
+        index,
+        date,
+        hasDateSelected,
+      );
+    });
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   };
@@ -760,8 +767,8 @@ export default class TaskScreen extends Component {
     var newTasks = this.state.tasks;
 
     newTasks[columnIndex].rows[index].comments = newArrComment;
-    this.UpdateTasks(newTasks);
     this.setState({arrComment: newArrComment});
+    this.UpdateTasks(newTasks);
   }
 }
 

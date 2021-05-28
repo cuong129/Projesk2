@@ -150,7 +150,7 @@ export default class MyProjectScreen extends Component {
                 ? require('../res/images/ic_app.png')
                 : {uri: url};
             const resizeMode = url == null || url === '' ? 'center' : 'cover';
-            const idProject = item.id
+            const idProject = item.id;
 
             return (
               <View>
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardTask: {
-    width: '70%',
+    width: '73%',
     alignSelf: 'center',
   },
 });

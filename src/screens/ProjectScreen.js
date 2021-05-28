@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   cardTask: {
-    width: 280,
+    width: 290,
     alignSelf: 'center',
   },
   iconEmpty: {
