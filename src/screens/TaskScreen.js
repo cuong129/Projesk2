@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Container,
   Header,
@@ -31,18 +31,18 @@ import {
   ActivityIndicatorComponent,
   Image,
 } from 'react-native';
-import {colors, ColorBoard} from '../res/colors';
+import { colors, ColorBoard } from '../res/colors';
 import ChecklistItem from '../components/ChecklistItem';
 import 'react-native-get-random-values';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import TagItem from '../components/TagItem';
 import TagColorBoard from '../components/TagColorBoard';
-import {auth, firestore} from '../firebase';
-import {typeAlert, AssignAlert} from '../components/AlertCustom';
+import { auth, firestore, addDeadlineNoti, addAssignNoti, deleteAssignNoti, deleteDeadlineNoti } from '../firebase';
+import { typeAlert, AssignAlert } from '../components/AlertCustom';
 
 export default class TaskScreen extends Component {
   constructor(props) {
@@ -64,10 +64,12 @@ export default class TaskScreen extends Component {
       selectedIDTagItem: '',
       completeBtn: 'COMPLETE',
       completeDetail: 'This task is active',
-      tasks: [{rows: [{name: ''}]}],
+      tasks: [{ rows: [{ name: '' }] }],
       alert: typeAlert.NONE,
       arrAssign: [],
       members: [],
+      oldDueDate: new Date(),
+      oldArrAssign: [],
     };
     this.currentUser = auth().currentUser;
   }
@@ -75,35 +77,37 @@ export default class TaskScreen extends Component {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
     const { idProject, columnIndex, index } = this.props.route.params;
     firestore()
-    .collection('Projects')
-    .doc(idProject)
-    .get()
-    .then(documentSnapshot => {
-      if(!documentSnapshot.exists) return
-      const data = documentSnapshot.data();
-      this.setState({tasks : data.tasks, members: data.members});
-      this.initValue(); 
-    })
+      .collection('Projects')
+      .doc(idProject)
+      .get()
+      .then(documentSnapshot => {
+        if (!documentSnapshot.exists) return
+        const data = documentSnapshot.data();
+        this.setState({ tasks: data.tasks, members: data.members });
+        this.initValue();
+      })
   }
   initValue() {
-    const {columnIndex, index} = this.props.route.params;
+    const { columnIndex, index } = this.props.route.params;
     const task = this.state.tasks[columnIndex].rows[index];
     this.setState({
       taskName: task.name,
       taskNote: task.note,
       arrAssign: task.assigns,
+      oldArrAssign: task.assigns,
     });
-    if (task.checklist != null) this.setState({arrChecklist: task.checklist});
-    if (task.tag != null) this.setState({arrTaglist: task.tag});
+    if (task.checklist != null) this.setState({ arrChecklist: task.checklist });
+    if (task.tag != null) this.setState({ arrTaglist: task.tag });
     if (task.DueDate != null) {
       this.setState({
         date: new Date(task.DueDate.toDate()),
         time: new Date(task.DueDate.toDate()),
         hasDateSelected: true,
+        oldDueDate: new Date(task.DueDate.toDate()),
       });
     }
     if (task.complete != null) {
-      const {hasCompleted, date, user} = task.complete;
+      const { hasCompleted, date, user } = task.complete;
       if (hasCompleted) {
         const dateCompleted = new Date(date.toDate());
         this.setState({
@@ -119,7 +123,7 @@ export default class TaskScreen extends Component {
     this.setState({
       arrChecklist: [
         ...this.state.arrChecklist,
-        {id: uuidv4(), hasChecked: false, name: this.state.ChecklistName},
+        { id: uuidv4(), hasChecked: false, name: this.state.ChecklistName },
       ],
       ChecklistName: '',
     });
@@ -127,8 +131,8 @@ export default class TaskScreen extends Component {
   handleEditChecklistItem = (id, text) => {
     const newArr = [...this.state.arrChecklist];
     const index = newArr.findIndex(item => item.id === id);
-    newArr[index] = Object.assign(newArr[index], {name: text});
-    this.setState({arrChecklist: newArr});
+    newArr[index] = Object.assign(newArr[index], { name: text });
+    this.setState({ arrChecklist: newArr });
   };
   handleDeleteChecklistItem = id => {
     this.setState({
@@ -141,11 +145,11 @@ export default class TaskScreen extends Component {
     newArr[index] = Object.assign(newArr[index], {
       hasChecked: !newArr[index].hasChecked,
     });
-    this.setState({arrChecklist: newArr});
+    this.setState({ arrChecklist: newArr });
   };
   //Date time picker
   onChange = (event, selectedValue) => {
-    this.setState({show: Platform.OS === 'ios'});
+    this.setState({ show: Platform.OS === 'ios' });
     if (this.state.mode === 'date') {
       const currentDate = selectedValue || new Date();
       if (event.type == 'set') {
@@ -174,7 +178,7 @@ export default class TaskScreen extends Component {
   };
 
   showDatepicker = () => {
-    this.setState({show: true, mode: 'date'});
+    this.setState({ show: true, mode: 'date' });
   };
   formatDate = date => {
     var hour = date.getHours();
@@ -209,7 +213,7 @@ export default class TaskScreen extends Component {
   };
 
   handlePressColor = colorIndex => {
-    this.setState({selectedColor: colorIndex});
+    this.setState({ selectedColor: colorIndex });
     this.RBSheet.close();
   };
   handleDeleteTagItem = id => {
@@ -220,11 +224,11 @@ export default class TaskScreen extends Component {
   handleEditTagItem = (id, text) => {
     const newArr = [...this.state.arrTaglist];
     const index = newArr.findIndex(item => item.id === id);
-    newArr[index] = Object.assign(newArr[index], {name: text});
-    this.setState({arrTaglist: newArr});
+    newArr[index] = Object.assign(newArr[index], { name: text });
+    this.setState({ arrTaglist: newArr });
   };
   handleOpenColorBoard = (id, colorIndex) => {
-    this.setState({selectedIDTagItem: id, selectedColorItem: colorIndex});
+    this.setState({ selectedIDTagItem: id, selectedColorItem: colorIndex });
     this.RBSheetItem.open();
   };
   handlePressColorItem = colorIndex => {
@@ -232,8 +236,8 @@ export default class TaskScreen extends Component {
     const index = newArr.findIndex(
       item => item.id === this.state.selectedIDTagItem,
     );
-    newArr[index] = Object.assign(newArr[index], {colorIndex: colorIndex});
-    this.setState({arrTaglist: newArr});
+    newArr[index] = Object.assign(newArr[index], { colorIndex: colorIndex });
+    this.setState({ arrTaglist: newArr });
     this.RBSheetItem.close();
   };
   UpdateTasks(tasks) {
@@ -245,7 +249,7 @@ export default class TaskScreen extends Component {
       });
   }
   handleUpdateTask = () => {
-    const {columnIndex, index} = this.props.route.params;
+    const { idProject, columnIndex, index } = this.props.route.params;
     const {
       tasks,
       taskName,
@@ -255,6 +259,7 @@ export default class TaskScreen extends Component {
       date,
       hasDateSelected,
       arrAssign,
+      oldArrAssign
     } = this.state;
     var newTasks = tasks;
     newTasks[columnIndex].rows[index].name = taskName;
@@ -267,7 +272,40 @@ export default class TaskScreen extends Component {
       ? firestore.Timestamp.fromDate(date)
       : null;
     newTasks[columnIndex].rows[index].assigns = arrAssign;
-    console.log(newTasks[columnIndex].rows[index].date);
+
+
+    //update deadline noti if due date has changed
+
+
+    //get list of changed Assign
+    // var oldArr = oldArrAssign;
+    // var newArr = arrAssign;
+    // if (oldArr.length > 0 && newArr.length > 0) {
+    //   var i = 0;
+    //   do {
+    //     var isChanged = true;
+    //     for (var j = 0; j < newArr.length; j++)
+    //       if (oldArr[i].uid === newArr[j].uid) {
+    //         oldArr.splice(i, 1);
+    //         newArr.splice(j, 1);
+    //         isChanged = false;
+    //         break;
+    //       }
+    //     if (isChanged)
+    //       i++;
+    //   } while (i < oldArr.length);
+    // }
+    // if (oldArr.length > 0 && newArr.length === 0) {
+    //   //delete assign and deadline noti of old Assign who has been unassigned
+    //   oldArr.forEach(user => {
+    //     deleteAssignNoti(user.uid, idProject, columnIndex, index);
+    //     //deleteDeadlineNoti(user.uid, idProject, columnIndex, index);
+    //   });
+    // }
+    console.log(arrAssign);
+    // arrAssign.forEach(user => {
+    //   addAssignNoti(newArr, user.uid, this.currentUser, idProject, columnIndex, index, date, hasDateSelected);
+    // });
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
   };
@@ -281,7 +319,7 @@ export default class TaskScreen extends Component {
   };
 
   handlePressComplete = () => {
-    const {columnIndex, index } = this.props.route.params;
+    const { columnIndex, index } = this.props.route.params;
     var newTasks = this.state.tasks;
     if (this.state.completeBtn === 'COMPLETE') {
       var date = new Date();
@@ -314,7 +352,7 @@ export default class TaskScreen extends Component {
   };
 
   render() {
-    const {arrAssign} = this.state;
+    const { arrAssign } = this.state;
 
     const showAlert = () => {
       if (this.state.alert == typeAlert.ASSIGN)
@@ -323,13 +361,13 @@ export default class TaskScreen extends Component {
 
     const renderAssignBtn = () => {
       if (arrAssign.length == 0)
-        return <Text style={{marginLeft: 10, fontSize: 16}}>Assign</Text>;
+        return <Text style={{ marginLeft: 10, fontSize: 16 }}>Assign</Text>;
       return (
         <FlatList
           horizontal
           data={arrAssign}
-          renderItem={({item}) => (
-            <Image style={styles.imageCircle} source={{uri: item.photoURL}} />
+          renderItem={({ item }) => (
+            <Image style={styles.imageCircle} source={{ uri: item.photoURL }} />
           )}
           keyExtractor={item => item.uid}
         />
@@ -339,7 +377,8 @@ export default class TaskScreen extends Component {
     return (
       <StyleProvider style={getTheme(material)}>
         <Container style={styles.container}>
-          <Header style={{backgroundColor: colors.Primary}}>
+          <StatusBar translucent={false} />
+          <Header style={{ backgroundColor: colors.Primary }}>
             <Left>
               <Button
                 transparent
@@ -355,7 +394,7 @@ export default class TaskScreen extends Component {
                 <Icon
                   name="delete"
                   type="MaterialCommunityIcons"
-                  style={{color: colors.Danger}}
+                  style={{ color: colors.Danger }}
                 />
               </Button>
               <Button transparent onPress={this.handleUpdateTask}>
@@ -380,10 +419,10 @@ export default class TaskScreen extends Component {
                 <Icon
                   name="checkmark-circle-sharp"
                   type="Ionicons"
-                  style={{color: colors.Positive}}
+                  style={{ color: colors.Positive }}
                 />
               )}
-              <Text style={{fontSize: 16, color: 'gray', flex: 1}}>
+              <Text style={{ fontSize: 16, color: 'gray', flex: 1 }}>
                 {this.state.completeDetail}
               </Text>
               <TouchableOpacity onPress={this.handlePressComplete}>
@@ -403,8 +442,8 @@ export default class TaskScreen extends Component {
               <Input
                 value={this.state.taskName}
                 placeholder="Add task name"
-                onChangeText={text => this.setState({taskName: text})}
-                style={{fontSize: 22}}
+                onChangeText={text => this.setState({ taskName: text })}
+                style={{ fontSize: 22 }}
               />
             </Item>
             <Item style={styles.item}>
@@ -412,18 +451,18 @@ export default class TaskScreen extends Component {
                 multiline
                 value={this.state.taskNote}
                 placeholder="Add card description"
-                onChangeText={text => this.setState({taskNote: text})}
+                onChangeText={text => this.setState({ taskNote: text })}
               />
             </Item>
             <Item>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => this.setState({alert: typeAlert.ASSIGN})}>
+                onPress={() => this.setState({ alert: typeAlert.ASSIGN })}>
                 <Icon
                   active
                   name="person-outline"
                   type="Ionicons"
-                  style={{color: colors.DarkPrimary}}
+                  style={{ color: colors.DarkPrimary }}
                 />
                 {renderAssignBtn()}
               </TouchableOpacity>
@@ -436,9 +475,9 @@ export default class TaskScreen extends Component {
                   active
                   name="clock"
                   type="Feather"
-                  style={{color: colors.Danger}}
+                  style={{ color: colors.Danger }}
                 />
-                <Text style={{marginLeft: 10, fontSize: 16, flex: 1}}>
+                <Text style={{ marginLeft: 10, fontSize: 16, flex: 1 }}>
                   {this.renderDateBtn()}
                 </Text>
                 {this.state.hasDateSelected && (
@@ -454,7 +493,7 @@ export default class TaskScreen extends Component {
                       active
                       name="calendar-remove"
                       type="MaterialCommunityIcons"
-                      style={{color: colors.Danger}}
+                      style={{ color: colors.Danger }}
                     />
                   </TouchableOpacity>
                 )}
@@ -464,7 +503,7 @@ export default class TaskScreen extends Component {
             <FlatList
               data={this.state.arrTaglist}
               keyExtractor={item => item.id}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <TagItem
                   item={item}
                   onDeletePress={this.handleDeleteTagItem}
@@ -479,7 +518,7 @@ export default class TaskScreen extends Component {
                   active
                   name="plus"
                   type="Feather"
-                  style={{color: colors.Primary}}
+                  style={{ color: colors.Primary }}
                 />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => this.RBSheet.open()}>
@@ -496,21 +535,21 @@ export default class TaskScreen extends Component {
               <Input
                 style={[
                   styles.tagInput,
-                  {backgroundColor: ColorBoard[this.state.selectedColor]},
+                  { backgroundColor: ColorBoard[this.state.selectedColor] },
                 ]}
                 placeholder="Add tag name"
                 placeholderTextColor="#fff"
                 onChangeText={text => {
-                  this.setState({TagName: text});
+                  this.setState({ TagName: text });
                 }}
                 value={this.state.TagName}
               />
-              <TouchableOpacity onPress={() => this.setState({arrTaglist: []})}>
+              <TouchableOpacity onPress={() => this.setState({ arrTaglist: [] })}>
                 <Icon
                   active
                   name="delete-sweep-outline"
                   type="MaterialCommunityIcons"
-                  style={{color: colors.Danger}}
+                  style={{ color: colors.Danger }}
                 />
               </TouchableOpacity>
             </Item>
@@ -527,7 +566,7 @@ export default class TaskScreen extends Component {
                 },
               }}>
               <Text
-                style={{fontSize: 16, marginVertical: 10, fontWeight: 'bold'}}>
+                style={{ fontSize: 16, marginVertical: 10, fontWeight: 'bold' }}>
                 Select a color
               </Text>
               <TagColorBoard
@@ -548,7 +587,7 @@ export default class TaskScreen extends Component {
                 },
               }}>
               <Text
-                style={{fontSize: 16, marginVertical: 10, fontWeight: 'bold'}}>
+                style={{ fontSize: 16, marginVertical: 10, fontWeight: 'bold' }}>
                 Select a color
               </Text>
               <TagColorBoard
@@ -560,7 +599,7 @@ export default class TaskScreen extends Component {
             <FlatList
               data={this.state.arrChecklist}
               keyExtractor={item => item.id}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <ChecklistItem
                   item={item}
                   onEditTextChange={this.handleEditChecklistItem}
@@ -575,23 +614,23 @@ export default class TaskScreen extends Component {
                   active
                   name="plus"
                   type="Feather"
-                  style={{color: colors.Primary}}
+                  style={{ color: colors.Primary }}
                 />
               </TouchableOpacity>
               <Input
                 placeholder="Add checklist item"
                 onChangeText={text => {
-                  this.setState({ChecklistName: text});
+                  this.setState({ ChecklistName: text });
                 }}
                 value={this.state.ChecklistName}
               />
               <TouchableOpacity
-                onPress={() => this.setState({arrChecklist: []})}>
+                onPress={() => this.setState({ arrChecklist: [] })}>
                 <Icon
                   active
                   name="delete-sweep-outline"
                   type="MaterialCommunityIcons"
-                  style={{color: colors.Danger}}
+                  style={{ color: colors.Danger }}
                 />
               </TouchableOpacity>
             </Item>
@@ -606,7 +645,6 @@ export default class TaskScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.listTaskBackground,
-    paddingTop: StatusBar.currentHeight - 4,
   },
   completeTitle: {
     backgroundColor: 'transparent',

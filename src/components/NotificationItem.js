@@ -12,11 +12,13 @@ export default class NotificationItem extends Component {
       detail: '',
       iconName: 'reload',
       iconColor: colors.Primary,
+      name: '',
+      time: '',
     };
   }
   componentDidMount() {
     const { item } = this.props;
-    firestore()
+    this.subscriber = firestore()
       .collection('Projects')
       .doc(item.idProject)
       .get()
@@ -25,9 +27,18 @@ export default class NotificationItem extends Component {
         this.initValue();
       });
   }
+  componentWillUnmount() {
+    return () => this.subscriber();
+  }
   initValue() {
     const { item } = this.props;
     const { project } = this.state;
+
+    this.setState({
+      name: item.type === 'deadline' || item.type === 'assign'
+        ? project.tasks[item.columnIndex].rows[item.index].name
+        : project.name
+    });
     if (item.type === 'invite') {
       this.setState({
         detail: "invited you to project ",
@@ -51,11 +62,22 @@ export default class NotificationItem extends Component {
         detail: "Your task ",
         iconName: "calendar",
         iconColor: ColorBoard[0],
+        time: this.formatTime(item.duedate),
       });
     }
   }
+  formatTime(duedate) {
+    const date = duedate.toDate();
+    var hour = date.getHours();
+    var minute = date.getMinutes();
+    if (hour < 10)
+      hour = '0' + hour;
+    if (minute < 10)
+      minute = '0' + minute;
+    return hour + ':' + minute;
+  }
   render() {
-    const { item, onPressItem } = this.props;
+    const { item, onPressItem, onPressDelete } = this.props;
     const { detail, iconName, iconColor, project } = this.state;
     return (
       <TouchableOpacity style={styles.container} onPress={() => { onPressItem(item.id) }}>
@@ -72,11 +94,18 @@ export default class NotificationItem extends Component {
           {item.type !== "deadline" && (<Text style={{ fontWeight: 'bold' }}>{item.name}</Text>)}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             <Text>{detail}</Text>
-            <Text style={{ fontWeight: 'bold' }}>{project.name}</Text>
+            <Text style={{ fontWeight: 'bold' }}>{this.state.name}</Text>
+            {item.type === 'deadline' && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                <Text>will expired at </Text>
+                <Text style={{ fontWeight: 'bold' }}>{this.state.time}</Text>
+                <Text> tomorrow</Text>
+              </View>
+            )}
           </View>
           <Text style={{ justifyContent: 'flex-end' }}>5 minutes ago</Text>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => onPressDelete(item.id)}>
           <Icon name="circle-with-cross" type='Entypo' style={{ color: colors.Danger, fontSize: 20, paddingHorizontal: 15 }} />
         </TouchableOpacity>
       </TouchableOpacity>
