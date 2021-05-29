@@ -83,6 +83,13 @@ const ProjectAlert = ({screen, type}) => {
   const CreateProject = () => {
     const user = auth().currentUser;
     let newProject = {
+      activities: [
+        {
+          content: screen.currentUser.displayName + ' create project',
+          time: Date.now(),
+          type: typeActivity.CREATE_PROJECT,
+        },
+      ],
       name: inputName,
       note: inputNote,
       photoURL: inputPhotoURL,

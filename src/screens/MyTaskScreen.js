@@ -23,6 +23,7 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import {colors} from '../res/colors';
 import TaskItem from '../components/TaskItem';
@@ -153,44 +154,38 @@ export default class MyProjectScreen extends Component {
             const idProject = item.id;
 
             return (
-              <View>
+              <View style={styles.itemProject}>
                 <View style={styles.headerList}>
-                  <Thumbnail
-                    square
-                    source={source}
-                    style={{
-                      backgroundColor: colors.Primary,
-                      resizeMode: resizeMode,
-                      marginHorizontal: 20,
-                      marginVertical: 10,
-                    }}
-                  />
                   <Text>{item.name}</Text>
                 </View>
-                <FlatList
-                  data={item.tasks}
-                  style={{paddingVertical: 5}}
-                  renderItem={({item}) => {
-                    return (
-                      <TouchableOpacity
-                        style={styles.cardTask}
-                        onPress={() =>
-                          navigation.navigate('Project', {
-                            screen: 'Task',
-                            params: {
-                              idProject: idProject,
-                              columnIndex: item.columnIndex,
-                              index: item.index,
-                            },
-                          })
-                        }>
-                        <TaskItem item={item.task} />
-                      </TouchableOpacity>
-                    );
-                  }}
-                  scrollEnabled={false}
-                  keyExtractor={item => item.id}
-                />
+                <ImageBackground
+                  source={source}
+                  style={styles.bodyList}
+                  imageStyle={styles.image}
+                  resizeMode={resizeMode}>
+                  <FlatList
+                    data={item.tasks}
+                    renderItem={({item}) => {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            navigation.navigate('Project', {
+                              screen: 'Task',
+                              params: {
+                                idProject: idProject,
+                                columnIndex: item.columnIndex,
+                                index: item.index,
+                              },
+                            })
+                          }>
+                          <TaskItem item={item.task} />
+                        </TouchableOpacity>
+                      );
+                    }}
+                    scrollEnabled={false}
+                    keyExtractor={item => item.id}
+                  />
+                </ImageBackground>
               </View>
             );
           }}
@@ -202,7 +197,7 @@ export default class MyProjectScreen extends Component {
     return (
       <Container style={{backgroundColor: colors.Background}}>
         <Header style={{backgroundColor: 'white'}}>
-          <SearchBar style={styles.searchBar} />
+          <SearchBar style={styles.searchBar} placeholder="Search tasks..." />
           <Right>
             <Button transparent>
               <Icon name="filter" type="Foundation" style={{color: 'black'}} />
@@ -250,11 +245,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 1,
     elevation: 4,
+    padding: 10,
   },
-  cardTask: {
-    width: '73%',
+  bodyList: {
+    backgroundColor: colors.Primary,
+    paddingVertical: 10,
+    elevation: 5,
+    paddingHorizontal: 30,
+  },
+  itemProject: {
+    width: '90%',
     alignSelf: 'center',
+    marginTop: 15,
+    elevation: 5,
   },
 });

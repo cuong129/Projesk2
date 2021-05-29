@@ -19,15 +19,19 @@ import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import {colors} from '../res/colors';
 import FormatPeriodTime from '../utility/FormatPeriodTime';
+import SearchBar from '../components/SearchBar';
 
 export default class ActivityScreen extends Component {
   constructor(props) {
     super(props);
+    this.state={
+      isFilter: false,
+    }
   }
 
   render() {
     const {navigation} = this.props;
-    const {activities} = this.props.route.params;
+    const {activities}=this.props.route.params;
 
     return (
       <StyleProvider style={getTheme(material)}>
@@ -42,8 +46,18 @@ export default class ActivityScreen extends Component {
             <Body>
               <Title>Activity</Title>
             </Body>
-            <Right></Right>
+            <Right>
+              <Button transparent>
+                <Icon name="filter-sharp" />
+              </Button>
+            </Right>
           </Header>
+          <View style={styles.viewSearch}>
+            <SearchBar
+              style={styles.searchBar}
+              placeholder="Search activities..."
+            />
+          </View>
           <FlatList
             data={activities}
             renderItem={item => this.renderItem(item)}
@@ -110,6 +124,11 @@ const iconActivities = [
     type: 'MaterialCommunityIcons',
     color: colors.Disable,
   },
+  {
+    name: 'create-new-folder',
+    type: 'MaterialIcons',
+    color: colors.Primary,
+  },
 ];
 
 const styles = StyleSheet.create({
@@ -132,5 +151,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  viewSearch: {
+    padding: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.Disable,
+  },
+  searchBar: {
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 5,
   },
 });

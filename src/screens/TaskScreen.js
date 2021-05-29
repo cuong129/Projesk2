@@ -802,6 +802,7 @@ export default class TaskScreen extends Component {
       arrTaglist,
       date,
       arrAssign,
+      hasDateSelected,
     } = this.state;
 
     let content = '';
@@ -818,11 +819,19 @@ export default class TaskScreen extends Component {
           else content += e.name + ', ';
         });
     }
-    const fromTime = this.formatDate(new Date(task.DueDate.toDate()));
+
     const toTime = this.formatDate(date);
-    if (fromTime != toTime) {
-      content += '\nChange due date from ' + fromTime + ' to ' + toTime + '.';
+    if (hasDateSelected) {
+      if (!task.DueDate) content += '\nSet due date is ' + toTime + '.';
+      else {
+        const fromTime = this.formatDate(new Date(task.DueDate.toDate()));
+        content += '\nChange due date from ' + fromTime + ' to ' + toTime + '.';
+      }
+    } else if (task.DueDate) {
+      const fromTime = this.formatDate(new Date(task.DueDate.toDate()));
+      if (toTime != fromTime) content += '\nDelete due date ' + fromTime + '.';
     }
+
     if (JSON.stringify(task.tag) !== JSON.stringify(arrTaglist)) {
       if (!task.tag && arrTaglist.length == 0);
       else content += '\nEdit list tag.';

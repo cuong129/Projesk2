@@ -239,6 +239,7 @@ const typeActivity = {
   DELETE_TASK: 11,
   COMPLETE_TASK: 12,
   RESTORE_TASK: 13,
+  CREATE_PROJECT: 14,
 };
 
 function addActivity(content, type, idProject) {

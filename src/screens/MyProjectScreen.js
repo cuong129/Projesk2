@@ -29,6 +29,7 @@ export default class MyProjectScreen extends Component {
       loading: true,
       projects: [],
       alert: typeAlert.NONE,
+      isSearch: false,
     };
     this.currentUser = auth().currentUser;
   }
@@ -40,10 +41,9 @@ export default class MyProjectScreen extends Component {
       .doc(this.currentUser.uid)
       .onSnapshot(querySnapshot => {
         const projects = [];
-        const MyProjectIdCopy = [];
         const MyProjectIds = querySnapshot.get('myProjects');
 
-        this.getAllInfoProject(MyProjectIds, 0, projects, MyProjectIdCopy);
+        this.getAllInfoProject(MyProjectIds, 0, projects);
       });
 
     // Unsubscribe from events when no longer in use
@@ -54,7 +54,7 @@ export default class MyProjectScreen extends Component {
     this.subscriber();
   }
 
-  getAllInfoProject(MyProjectIds, index, projects, MyProjectIdCopy) {
+  getAllInfoProject(MyProjectIds, index, projects) {
     if (!MyProjectIds) {
       this.setState({
         projects: projects,
@@ -63,13 +63,6 @@ export default class MyProjectScreen extends Component {
       return;
     }
     if (index == MyProjectIds.length) {
-      // update my id projects if have change
-      if (MyProjectIdCopy.length != MyProjectIds.length)
-        firestore()
-          .collection('Users')
-          .doc(this.currentUser.uid)
-          .update({myProjects: MyProjectIdCopy});
-
       this.setState({
         projects: projects,
         loading: false,
@@ -89,21 +82,24 @@ export default class MyProjectScreen extends Component {
             photoURL: result.get('photoURL'),
           };
           projects.push(project);
-          MyProjectIdCopy.push(MyProjectIds[index]);
+        } else {
+          firestore()
+            .collection('Users')
+            .doc(this.currentUser.uid)
+            .update({
+              myProjects: firestore.FieldValue.arrayRemove(MyProjectIds[index]),
+            });
         }
       })
       .finally(() => {
-        this.getAllInfoProject(
-          MyProjectIds,
-          index + 1,
-          projects,
-          MyProjectIdCopy,
-        );
+        this.getAllInfoProject(MyProjectIds, index + 1, projects);
       });
   }
 
   render() {
     const {navigation} = this.props;
+    const {isSearch, projects} = this.state;
+    this.data = isSearch ? this.data : [...projects];
 
     const componentBody = () => {
       if (this.state.loading)
@@ -112,17 +108,21 @@ export default class MyProjectScreen extends Component {
             <ActivityIndicator color={colors.Primary} size="large" />
           </View>
         );
-      if (this.state.projects.length == 0)
+      if (this.data.length == 0)
         return (
           <View style={styles.containerView}>
             <Icon name="cube" style={styles.iconEmpty} />
-            <Text note>You have no projects</Text>
-            <Text note>Tap + to create a new one</Text>
+            {(isSearch && <Text note>No result</Text>) || (
+              <View style={{alignItems: 'center'}}>
+                <Text note>You have no projects</Text>
+                <Text note>Tap + to create a new one</Text>
+              </View>
+            )}
           </View>
         );
       return (
         <FlatList
-          data={this.state.projects}
+          data={this.data}
           contentContainerStyle={styles.container}
           numColumns={2}
           renderItem={({item}) => {
@@ -164,7 +164,12 @@ export default class MyProjectScreen extends Component {
     return (
       <Container style={{backgroundColor: colors.Background}}>
         <Header style={{backgroundColor: 'white'}}>
-          <SearchBar style={styles.searchBar} />
+          <SearchBar
+            style={styles.searchBar}
+            placeholder="Search projects..."
+            onSearch={text => this.handleSearch(text)}
+            endSearch={() => this.setState({isSearch: false})}
+          />
         </Header>
         <FocusAwareStatusBar backgroundColor="white" barStyle="dark-content" />
         <View style={styles.titleView}>
@@ -172,13 +177,20 @@ export default class MyProjectScreen extends Component {
         </View>
         {showAlert()}
         {componentBody()}
-        <Fab
-          style={{backgroundColor: colors.Primary}}
-          onPress={() => this.setState({alert: typeAlert.CREATE_PROJECT})}>
-          <Icon name="add" />
-        </Fab>
+        {isSearch ? null : (
+          <Fab
+            style={{backgroundColor: colors.Primary}}
+            onPress={() => this.setState({alert: typeAlert.CREATE_PROJECT})}>
+            <Icon name="add" />
+          </Fab>
+        )}
       </Container>
     );
+  }
+
+  handleSearch(text) {
+    this.data = this.state.projects.filter(e => e.name == text);
+    this.setState({isSearch: true});
   }
 }
 
@@ -211,9 +223,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchBar:{
-    alignSelf:'center',
-    width:'100%',
-    paddingHorizontal:5
-  }
+  searchBar: {
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 5,
+  },
 });
