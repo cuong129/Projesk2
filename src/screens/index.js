@@ -9,6 +9,7 @@ import AccountScreen from './AccountScreen';
 import ProjectScreen from './ProjectScreen';
 import TaskScreen from './TaskScreen';
 import MemberScreen from './MemberScreen';
+import ActivityScreen from './ActivityScreen';
 
 export {
   SplashScreen,
@@ -19,5 +20,6 @@ export {
   AccountScreen,
   ProjectScreen,
   TaskScreen,
-  MemberScreen
+  MemberScreen,
+  ActivityScreen
 };

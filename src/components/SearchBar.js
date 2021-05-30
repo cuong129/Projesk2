@@ -13,17 +13,24 @@ export default class SearchBar extends Component {
 
   render() {
     const {search} = this.state;
-    const {style, onSearch} = this.props;
+    const {style, onSearch, placeholder, endSearch} = this.props;
     const componentSearch = () => {
       if (search)
         return (
           <View style={styles.searchView}>
             <Icon active name="search" style={styles.iconSearch} />
-            <Input autoFocus style={styles.inputStyle} onChangeText={onSearch}/>
+            <Input
+              autoFocus
+              style={styles.inputStyle}
+              onChangeText={onSearch}
+            />
             <Icon
               name="close"
               style={styles.iconSearch}
-              onPress={() => this.setState({search: false})}
+              onPress={() => {
+                this.setState({search: false});
+                endSearch();
+              }}
             />
           </View>
         );
@@ -38,7 +45,7 @@ export default class SearchBar extends Component {
           <Text
             style={styles.textSearch}
             onPress={() => this.setState({search: true})}>
-            Search tasks...
+            {placeholder}
           </Text>
         </View>
       );

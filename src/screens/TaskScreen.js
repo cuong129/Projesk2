@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   Container,
   Header,
@@ -33,19 +33,29 @@ import {
   Image,
   Keyboard,
 } from 'react-native';
-import { colors, ColorBoard } from '../res/colors';
+import {colors, ColorBoard} from '../res/colors';
 import ChecklistItem from '../components/ChecklistItem';
 import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import TagItem from '../components/TagItem';
 import TagColorBoard from '../components/TagColorBoard';
-import { auth, firestore, addDeadlineNoti, addAssignNoti, deleteAssignNoti, addCommentNoti, deleteTaskNoti } from '../firebase';
-import { typeAlert, AssignAlert } from '../components/AlertCustom';
-import FormatPeriodTime from '../utility/FormatPeriodTime'
+import {
+  auth,
+  firestore,
+  addDeadlineNoti,
+  addAssignNoti,
+  deleteAssignNoti,
+  addCommentNoti, 
+  deleteTaskNoti,
+  addActivity,
+  typeActivity,
+} from '../firebase';
+import {typeAlert, AssignAlert} from '../components/AlertCustom';
+import FormatPeriodTime from '../utility/FormatPeriodTime';
 
 export default class TaskScreen extends Component {
   constructor(props) {
@@ -67,7 +77,7 @@ export default class TaskScreen extends Component {
       selectedIDTagItem: '',
       completeBtn: 'COMPLETE',
       completeDetail: 'This task is active',
-      tasks: [{ rows: [{ name: '' }] }],
+      tasks: [{rows: [{name: ''}]}],
       alert: typeAlert.NONE,
       arrAssign: [],
       members: [],
@@ -78,7 +88,7 @@ export default class TaskScreen extends Component {
   }
   componentDidMount() {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    const { idProject, columnIndex, index } = this.props.route.params;
+    const {idProject, columnIndex, index} = this.props.route.params;
     firestore()
       .collection('Projects')
       .doc(idProject)
@@ -86,29 +96,33 @@ export default class TaskScreen extends Component {
       .then(documentSnapshot => {
         if (!documentSnapshot.exists) return;
         const data = documentSnapshot.data();
-        this.setState({ tasks: data.tasks, members: data.members });
+        this.setState({tasks: data.tasks, members: data.members});
         this.initValue();
       });
   }
   initValue() {
-    const { columnIndex, index } = this.props.route.params;
+    const {columnIndex, index} = this.props.route.params;
     const task = this.state.tasks[columnIndex].rows[index];
 
-    if (task.comments != null) {
-      var newArrComment = task.comments;
+    let newArrComment = [];
+    if (task.comments) {
+      newArrComment = [...task.comments];
       newArrComment.sort((firstEl, secondEl) => {
         return secondEl.time - firstEl.time;
       });
-      this.setState({ arrComment: newArrComment })
     }
+    let newArrAssigns = [];
+    if (task.assigns) newArrAssigns = [...task.assigns];
+
     this.setState({
       taskName: task.name,
       taskNote: task.note,
-      arrAssign: task.assigns,
-      oldArrAssign: task.assigns,
+      arrAssign: newArrAssigns,
+      oldArrAssign: newArrAssigns,
+      arrComment: newArrComment,
     });
-    if (task.checklist != null) this.setState({ arrChecklist: task.checklist });
-    if (task.tag != null) this.setState({ arrTaglist: task.tag });
+    if (task.checklist != null) this.setState({arrChecklist: task.checklist});
+    if (task.tag != null) this.setState({arrTaglist: task.tag});
     if (task.DueDate != null) {
       this.setState({
         date: new Date(task.DueDate.toDate()),
@@ -117,7 +131,7 @@ export default class TaskScreen extends Component {
       });
     }
     if (task.complete != null) {
-      const { hasCompleted, date, user } = task.complete;
+      const {hasCompleted, date, user} = task.complete;
       if (hasCompleted) {
         const dateCompleted = new Date(date.toDate());
         this.setState({
@@ -133,7 +147,7 @@ export default class TaskScreen extends Component {
     this.setState({
       arrChecklist: [
         ...this.state.arrChecklist,
-        { id: uuidv4(), hasChecked: false, name: this.state.ChecklistName },
+        {id: uuidv4(), hasChecked: false, name: this.state.ChecklistName},
       ],
       ChecklistName: '',
     });
@@ -141,8 +155,8 @@ export default class TaskScreen extends Component {
   handleEditChecklistItem = (id, text) => {
     const newArr = [...this.state.arrChecklist];
     const index = newArr.findIndex(item => item.id === id);
-    newArr[index] = Object.assign(newArr[index], { name: text });
-    this.setState({ arrChecklist: newArr });
+    newArr[index] = Object.assign(newArr[index], {name: text});
+    this.setState({arrChecklist: newArr});
   };
   handleDeleteChecklistItem = id => {
     this.setState({
@@ -155,11 +169,11 @@ export default class TaskScreen extends Component {
     newArr[index] = Object.assign(newArr[index], {
       hasChecked: !newArr[index].hasChecked,
     });
-    this.setState({ arrChecklist: newArr });
+    this.setState({arrChecklist: newArr});
   };
   //Date time picker
   onChange = (event, selectedValue) => {
-    this.setState({ show: Platform.OS === 'ios' });
+    this.setState({show: Platform.OS === 'ios'});
     if (this.state.mode === 'date') {
       const currentDate = selectedValue || new Date();
       if (event.type == 'set') {
@@ -188,7 +202,7 @@ export default class TaskScreen extends Component {
   };
 
   showDatepicker = () => {
-    this.setState({ show: true, mode: 'date' });
+    this.setState({show: true, mode: 'date'});
   };
   formatDate = date => {
     var hour = date.getHours();
@@ -222,7 +236,7 @@ export default class TaskScreen extends Component {
   };
 
   handlePressColor = colorIndex => {
-    this.setState({ selectedColor: colorIndex });
+    this.setState({selectedColor: colorIndex});
     this.RBSheet.close();
   };
   handleDeleteTagItem = id => {
@@ -233,11 +247,11 @@ export default class TaskScreen extends Component {
   handleEditTagItem = (id, text) => {
     const newArr = [...this.state.arrTaglist];
     const index = newArr.findIndex(item => item.id === id);
-    newArr[index] = Object.assign(newArr[index], { name: text });
-    this.setState({ arrTaglist: newArr });
+    newArr[index] = Object.assign(newArr[index], {name: text});
+    this.setState({arrTaglist: newArr});
   };
   handleOpenColorBoard = (id, colorIndex) => {
-    this.setState({ selectedIDTagItem: id, selectedColorItem: colorIndex });
+    this.setState({selectedIDTagItem: id, selectedColorItem: colorIndex});
     this.RBSheetItem.open();
   };
   handlePressColorItem = colorIndex => {
@@ -245,8 +259,8 @@ export default class TaskScreen extends Component {
     const index = newArr.findIndex(
       item => item.id === this.state.selectedIDTagItem,
     );
-    newArr[index] = Object.assign(newArr[index], { colorIndex: colorIndex });
-    this.setState({ arrTaglist: newArr });
+    newArr[index] = Object.assign(newArr[index], {colorIndex: colorIndex});
+    this.setState({arrTaglist: newArr});
     this.RBSheetItem.close();
   };
   UpdateTasks(tasks) {
@@ -258,7 +272,7 @@ export default class TaskScreen extends Component {
       });
   }
   handleUpdateTask = () => {
-    const { idProject, columnIndex, index } = this.props.route.params;
+    const {idProject, columnIndex, index} = this.props.route.params;
     const {
       tasks,
       taskName,
@@ -268,22 +282,22 @@ export default class TaskScreen extends Component {
       date,
       hasDateSelected,
       arrAssign,
-      oldArrAssign
+      oldArrAssign,
     } = this.state;
     var newTasks = tasks;
-    newTasks[columnIndex].rows[index].name = taskName;
-    newTasks[columnIndex].rows[index].note = taskNote;
-    newTasks[columnIndex].rows[index].tag =
-      arrTaglist.length > 0 ? arrTaglist : null;
-    newTasks[columnIndex].rows[index].checklist =
-      arrChecklist.length > 0 ? arrChecklist : null;
-    newTasks[columnIndex].rows[index].DueDate = hasDateSelected
-      ? firestore.Timestamp.fromDate(date)
-      : null;
-    newTasks[columnIndex].rows[index].assigns = arrAssign;
+    let task = newTasks[columnIndex].rows[index];
+    //add activity before update
+    this.addActivityUpdateTask(task, idProject);
 
+    task.name = taskName;
+    task.note = taskNote;
+    task.tag = arrTaglist.length > 0 ? arrTaglist : null;
+    task.checklist = arrChecklist.length > 0 ? arrChecklist : null;
+    task.DueDate = hasDateSelected ? firestore.Timestamp.fromDate(date) : null;
+    task.assigns = arrAssign;
 
     //update deadline noti if due date has changed
+
     //get list of changed Assign
     const oldArr = [...oldArrAssign];
     const newArr = [...arrAssign];
@@ -298,8 +312,7 @@ export default class TaskScreen extends Component {
             isChanged = false;
             break;
           }
-        if (isChanged)
-          i++;
+        if (isChanged) i++;
       } while (i < oldArr.length);
     }
     if (oldArr.length > 0 && newArr.length === 0) {
@@ -309,7 +322,16 @@ export default class TaskScreen extends Component {
       });
     }
     arrAssign.forEach(user => {
-      addAssignNoti(newArr, user.uid, this.currentUser, idProject, columnIndex, index, date, hasDateSelected);
+      addAssignNoti(
+        newArr,
+        user.uid,
+        this.currentUser,
+        idProject,
+        columnIndex,
+        index,
+        date,
+        hasDateSelected,
+      );
     });
     this.UpdateTasks(newTasks);
     this.props.navigation.goBack();
@@ -318,6 +340,14 @@ export default class TaskScreen extends Component {
   handleDeleteTask = () => {
     const { idProject, columnIndex, index } = this.props.route.params;
     var newTasks = this.state.tasks;
+
+    //add activity
+    let content =
+      this.currentUser.displayName +
+      ' delete task ' +
+      newTasks[columnIndex].rows[index].name;
+    addActivity(content, typeActivity.DELETE_TASK, idProject);
+
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
     this.state.arrAssign.forEach(user => deleteTaskNoti(user.uid, idProject, columnIndex, index));
@@ -325,7 +355,7 @@ export default class TaskScreen extends Component {
   };
 
   handlePressComplete = () => {
-    const { columnIndex, index } = this.props.route.params;
+    const {columnIndex, index, idProject} = this.props.route.params;
     var newTasks = this.state.tasks;
     if (this.state.completeBtn === 'COMPLETE') {
       var date = new Date();
@@ -344,6 +374,13 @@ export default class TaskScreen extends Component {
         date: firestore.Timestamp.fromDate(date),
       };
       newTasks[columnIndex].rows[index].DueDate = this.state.date;
+
+      //add activity
+      let content =
+        this.currentUser.displayName +
+        ' complete task ' +
+        newTasks[columnIndex].rows[index].name;
+      addActivity(content, typeActivity.COMPLETE_TASK, idProject);
     } else {
       this.setState({
         completeDetail: 'This task is active',
@@ -354,12 +391,18 @@ export default class TaskScreen extends Component {
         user: null,
         date: null,
       };
+      //add activity
+      let content =
+        this.currentUser.displayName +
+        ' restore task ' +
+        newTasks[columnIndex].rows[index].name;
+      addActivity(content, typeActivity.RESTORE_TASK, idProject);
     }
     this.UpdateTasks(newTasks);
   };
 
   render() {
-    const { arrAssign, arrComment } = this.state;
+    const {arrAssign, arrComment} = this.state;
     const showAlert = () => {
       if (this.state.alert == typeAlert.ASSIGN)
         return <AssignAlert screen={this} />;
@@ -367,13 +410,13 @@ export default class TaskScreen extends Component {
 
     const renderAssignBtn = () => {
       if (arrAssign.length == 0)
-        return <Text style={{ marginLeft: 10, fontSize: 16 }}>Assign</Text>;
+        return <Text style={{marginLeft: 10, fontSize: 16}}>Assign</Text>;
       return (
         <FlatList
           horizontal
           data={arrAssign}
-          renderItem={({ item }) => (
-            <Image style={styles.imageCircle} source={{ uri: item.photoURL }} />
+          renderItem={({item}) => (
+            <Image style={styles.imageCircle} source={{uri: item.photoURL}} />
           )}
           keyExtractor={item => item.uid}
         />
@@ -384,7 +427,7 @@ export default class TaskScreen extends Component {
       <StyleProvider style={getTheme(material)}>
         <Container style={styles.container}>
           <StatusBar translucent={false} />
-          <Header style={{ backgroundColor: colors.Primary }}>
+          <Header style={{backgroundColor: colors.Primary}}>
             <Left>
               <Button
                 transparent
@@ -400,7 +443,7 @@ export default class TaskScreen extends Component {
                 <Icon
                   name="delete"
                   type="MaterialCommunityIcons"
-                  style={{ color: colors.Danger }}
+                  style={{color: colors.Danger}}
                 />
               </Button>
               <Button transparent onPress={this.handleUpdateTask}>
@@ -450,8 +493,8 @@ export default class TaskScreen extends Component {
               <Input
                 value={this.state.taskName}
                 placeholder="Add task name"
-                onChangeText={text => this.setState({ taskName: text })}
-                style={{ fontSize: 22 }}
+                onChangeText={text => this.setState({taskName: text})}
+                style={{fontSize: 22}}
               />
             </Item>
             <Item style={styles.item}>
@@ -459,23 +502,23 @@ export default class TaskScreen extends Component {
                 multiline
                 value={this.state.taskNote}
                 placeholder="Add card description"
-                onChangeText={text => this.setState({ taskNote: text })}
+                onChangeText={text => this.setState({taskNote: text})}
               />
             </Item>
             <Item>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => this.setState({ alert: typeAlert.ASSIGN })}>
+                onPress={() => this.setState({alert: typeAlert.ASSIGN})}>
                 <Icon
                   active
                   name="person-outline"
                   type="Ionicons"
-                  style={{ color: colors.DarkPrimary }}
+                  style={{color: colors.DarkPrimary}}
                 />
                 {renderAssignBtn()}
               </TouchableOpacity>
             </Item>
-            <Item style={{ marginBottom: 10 }}>
+            <Item style={{marginBottom: 10}}>
               <TouchableOpacity
                 style={styles.button}
                 onPress={this.showDatepicker}>
@@ -483,9 +526,9 @@ export default class TaskScreen extends Component {
                   active
                   name="clock"
                   type="Feather"
-                  style={{ color: colors.Danger }}
+                  style={{color: colors.Danger}}
                 />
-                <Text style={{ marginLeft: 10, fontSize: 16, flex: 1 }}>
+                <Text style={{marginLeft: 10, fontSize: 16, flex: 1}}>
                   {this.renderDateBtn()}
                 </Text>
                 {this.state.hasDateSelected && (
@@ -501,7 +544,7 @@ export default class TaskScreen extends Component {
                       active
                       name="calendar-remove"
                       type="MaterialCommunityIcons"
-                      style={{ color: colors.Danger }}
+                      style={{color: colors.Danger}}
                     />
                   </TouchableOpacity>
                 )}
@@ -511,7 +554,7 @@ export default class TaskScreen extends Component {
             <FlatList
               data={this.state.arrTaglist}
               keyExtractor={item => item.id}
-              renderItem={({ item }) => (
+              renderItem={({item}) => (
                 <TagItem
                   item={item}
                   onDeletePress={this.handleDeleteTagItem}
@@ -526,7 +569,7 @@ export default class TaskScreen extends Component {
                   active
                   name="plus"
                   type="Feather"
-                  style={{ color: colors.Primary }}
+                  style={{color: colors.Primary}}
                 />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => this.RBSheet.open()}>
@@ -543,21 +586,21 @@ export default class TaskScreen extends Component {
               <Input
                 style={[
                   styles.tagInput,
-                  { backgroundColor: ColorBoard[this.state.selectedColor] },
+                  {backgroundColor: ColorBoard[this.state.selectedColor]},
                 ]}
                 placeholder="Add tag name"
                 placeholderTextColor="#fff"
                 onChangeText={text => {
-                  this.setState({ TagName: text });
+                  this.setState({TagName: text});
                 }}
                 value={this.state.TagName}
               />
-              <TouchableOpacity onPress={() => this.setState({ arrTaglist: [] })}>
+              <TouchableOpacity onPress={() => this.setState({arrTaglist: []})}>
                 <Icon
                   active
                   name="delete-sweep-outline"
                   type="MaterialCommunityIcons"
-                  style={{ color: colors.Danger }}
+                  style={{color: colors.Danger}}
                 />
               </TouchableOpacity>
             </Item>
@@ -574,7 +617,7 @@ export default class TaskScreen extends Component {
                 },
               }}>
               <Text
-                style={{ fontSize: 16, marginVertical: 10, fontWeight: 'bold' }}>
+                style={{fontSize: 16, marginVertical: 10, fontWeight: 'bold'}}>
                 Select a color
               </Text>
               <TagColorBoard
@@ -595,7 +638,7 @@ export default class TaskScreen extends Component {
                 },
               }}>
               <Text
-                style={{ fontSize: 16, marginVertical: 10, fontWeight: 'bold' }}>
+                style={{fontSize: 16, marginVertical: 10, fontWeight: 'bold'}}>
                 Select a color
               </Text>
               <TagColorBoard
@@ -607,7 +650,7 @@ export default class TaskScreen extends Component {
             <FlatList
               data={this.state.arrChecklist}
               keyExtractor={item => item.id}
-              renderItem={({ item }) => (
+              renderItem={({item}) => (
                 <ChecklistItem
                   item={item}
                   onEditTextChange={this.handleEditChecklistItem}
@@ -622,31 +665,31 @@ export default class TaskScreen extends Component {
                   active
                   name="plus"
                   type="Feather"
-                  style={{ color: colors.Primary }}
+                  style={{color: colors.Primary}}
                 />
               </TouchableOpacity>
               <Input
                 placeholder="Add checklist item"
                 onChangeText={text => {
-                  this.setState({ ChecklistName: text });
+                  this.setState({ChecklistName: text});
                 }}
                 value={this.state.ChecklistName}
               />
               <TouchableOpacity
-                onPress={() => this.setState({ arrChecklist: [] })}>
+                onPress={() => this.setState({arrChecklist: []})}>
                 <Icon
                   active
                   name="delete-sweep-outline"
                   type="MaterialCommunityIcons"
-                  style={{ color: colors.Danger }}
+                  style={{color: colors.Danger}}
                 />
               </TouchableOpacity>
             </Item>
 
             {/* comment */}
-            <View style={{ backgroundColor: 'white' }}>
+            <View style={{backgroundColor: 'white'}}>
               <Text style={styles.title}>Conversations</Text>
-              <Item style={{ paddingHorizontal: 10 }}>
+              <Item style={{paddingHorizontal: 10}}>
                 <Input
                   placeholder="Add Comment"
                   onChangeText={text => (this.content = text)}
@@ -655,47 +698,16 @@ export default class TaskScreen extends Component {
                 <Icon
                   active
                   name="send-sharp"
-                  style={{ color: colors.Primary }}
+                  style={{color: colors.Primary}}
                   onPress={() => this.sendComment()}
                 />
               </Item>
               <FlatList
                 data={arrComment}
-                keyExtractor={item => item.time}
-                renderItem={({ item, index }) => (
-                  <ListItem avatar noBorder>
-                    <Left>
-                      <Thumbnail source={{ uri: item.photoURL }} small />
-                    </Left>
-                    <Body>
-                      <View style={styles.commentHeader}>
-                        <View>
-                          <Text note>{FormatPeriodTime(item.time)}</Text>
-                          <Text>{item.name}</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                          <Icon
-                            name="insert-emoticon"
-                            type="MaterialIcons"
-                            style={{
-                              color: '#01A5F4',
-                              marginRight: 20,
-                              fontSize: 25,
-                            }}
-                          />
-                          <Icon
-                            name="chat-remove-outline"
-                            type="MaterialCommunityIcons"
-                            style={{ color: colors.Danger, fontSize: 25 }}
-                            onPress={() => this.deleteComment(index)}
-                          />
-                        </View>
-                      </View>
-                      <Text style={styles.contentComment}>{item.content}</Text>
-                    </Body>
-                    <Right></Right>
-                  </ListItem>
-                )}
+                keyExtractor={(item, index) => index}
+                renderItem={({item, index}) =>
+                  this.renderItemCommand(item, index)
+                }
               />
             </View>
           </Content>
@@ -705,9 +717,58 @@ export default class TaskScreen extends Component {
     );
   }
 
+  renderItemCommand(item, index) {
+    const icon = this.getIcon(item);
+    return (
+      <ListItem avatar noBorder>
+        <Left>
+          <Thumbnail source={{uri: item.photoURL}} small />
+        </Left>
+        <Body>
+          <View style={styles.commentHeader}>
+            <View>
+              <Text note>{FormatPeriodTime(item.time)}</Text>
+              <Text>{item.name}</Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <Icon
+                name={icon.name}
+                type={icon.type}
+                style={icon.style}
+                onPress={() => {
+                  icon.delete ? this.deleteComment(index) : null;
+                }}
+              />
+            </View>
+          </View>
+          <Text style={styles.contentComment}>{item.content}</Text>
+        </Body>
+        <Right></Right>
+      </ListItem>
+    );
+  }
+
+  getIcon(item) {
+    if (item.uid == this.currentUser.uid)
+      return {
+        name: 'chat-remove-outline',
+        type: 'MaterialCommunityIcons',
+        style: {color: colors.Danger, fontSize: 25},
+        delete: true,
+      };
+
+    return {
+      name: 'insert-emoticon',
+      type: 'MaterialIcons',
+      style: {color: '#01A5F4', marginRight: 20, fontSize: 25},
+      delete: false,
+    };
+  }
+
   sendComment() {
     if (!this.content || this.content.trim() == '') return;
     const newComment = {
+      uid: this.currentUser.uid,
       name: this.currentUser.displayName,
       photoURL: this.currentUser.photoURL,
       time: Date.now(),
@@ -729,17 +790,74 @@ export default class TaskScreen extends Component {
 
   updateCommand(newArrComment) {
     const { idProject, columnIndex, index } = this.props.route.params;
-    var newTasks = this.state.tasks;
+    let newTasks = this.state.tasks;
 
     newTasks[columnIndex].rows[index].comments = newArrComment;
-    this.setState({ arrComment: newArrComment });
     this.UpdateTasks(newTasks);
     this.state.arrAssign.forEach(user => {
       if (user.uid !== this.currentUser.uid) {
         addCommentNoti(user.uid, this.currentUser, idProject, columnIndex, index);
       }
     })
+    this.setState({arrComment: newArrComment});
+  }
 
+  addActivityUpdateTask(task, idProject) {
+    const {
+      taskName,
+      taskNote,
+      arrChecklist,
+      arrTaglist,
+      date,
+      arrAssign,
+      hasDateSelected,
+    } = this.state;
+
+    let content = '';
+    if (task.name != taskName)
+      content += '\nRename task from ' + task.name + ' to ' + taskName + '.';
+    if (task.note != taskNote)
+      content += '\nChange note from ' + task.note + ' to ' + taskNote + '.';
+    if (JSON.stringify(task.assigns) !== JSON.stringify(arrAssign)) {
+      content += '\nAssign task for ';
+      if (arrAssign.length == 0) content += 'no one';
+      else
+        arrAssign.forEach((e, index) => {
+          if (index == arrAssign.length - 1) content += e.name + '.';
+          else content += e.name + ', ';
+        });
+    }
+
+    const toTime = this.formatDate(date);
+    if (hasDateSelected) {
+      if (!task.DueDate) content += '\nSet due date is ' + toTime + '.';
+      else {
+        const fromTime = this.formatDate(new Date(task.DueDate.toDate()));
+        content += '\nChange due date from ' + fromTime + ' to ' + toTime + '.';
+      }
+    } else if (task.DueDate) {
+      const fromTime = this.formatDate(new Date(task.DueDate.toDate()));
+      if (toTime != fromTime) content += '\nDelete due date ' + fromTime + '.';
+    }
+
+    if (JSON.stringify(task.tag) !== JSON.stringify(arrTaglist)) {
+      if (!task.tag && arrTaglist.length == 0);
+      else content += '\nEdit list tag.';
+    }
+    if (JSON.stringify(task.checklist) !== JSON.stringify(arrChecklist)) {
+      if (!task.checklist && arrChecklist.length == 0);
+      else content += '\nEdit checklist.';
+    }
+
+    if (content === '') return;
+    content =
+      this.currentUser.displayName +
+      ' edit detail task ' +
+      task.name +
+      ':' +
+      content;
+
+    addActivity(content, typeActivity.EDIT_TASK, idProject);
   }
 }
 

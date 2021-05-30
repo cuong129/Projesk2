@@ -29,7 +29,6 @@ const AssignAlert = ({screen}) => {
 
   const addAssign = item => {
     let newAssign = {...item};
-    delete newAssign.name;
     delete newAssign.admin;
 
     const index = assigns.findIndex(element => element.uid == item.uid);

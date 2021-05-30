@@ -31,7 +31,7 @@ import {
   ProjectAlert,
   typeAlert,
 } from '../components/AlertCustom/index';
-import {auth, firestore, deleteProjectNoti, updateTaskNoti} from '../firebase';
+import {auth, firestore, addActivity, typeActivity, deleteProjectNoti, updateTaskNoti} from '../firebase';
 import OptionsMenu from 'react-native-options-menu';
 import { interpolateNode } from 'react-native-reanimated';
 
@@ -132,6 +132,17 @@ export default class ProjectScreen extends Component {
     });
   };
 
+  showActivity = () => {
+    let arrActivity = [...this.state.project.activities];
+    arrActivity.sort((firstEl, secondEl) => {
+      return secondEl.time - firstEl.time;
+    });
+
+    this.props.navigation.navigate('Activity', {
+      activities: arrActivity,
+    });
+  };
+
   deleteProject = () => {
     const {currentMember} = this.state;
     const content = currentMember.admin ? 'delete' : 'leave';
@@ -167,6 +178,10 @@ export default class ProjectScreen extends Component {
                   members: firestore.FieldValue.arrayRemove(currentMember),
                 });
               this.props.navigation.goBack();
+
+              //add activity
+              let content = this.currentUser.displayName + ' leave project';
+              addActivity(content, typeActivity.LEAVE_PROJECT, this.idProject);
             }
           },
         },
@@ -220,11 +235,13 @@ export default class ProjectScreen extends Component {
                 options={[
                   'Edit Project',
                   'Member',
+                  'Activity',
                   currentMember.admin ? 'Delete Project' : 'Leave Project',
                 ]}
                 actions={[
                   this.editProject,
                   this.showMember,
+                  this.showActivity,
                   this.deleteProject,
                 ]}
               />
@@ -293,19 +310,30 @@ export default class ProjectScreen extends Component {
 
   onDragEnd(srcColumnId, destColumnId, item) {
     const newData = [...this.state.project.tasks];
-
     const row = {...item.row()};
     const indexOld = newData[srcColumnId].rows.indexOf(row);
+    if (srcColumnId != destColumnId) {
+      //add activity
+      let content =
+        this.currentUser.displayName +
+        ' move task ' +
+        row.name +
+        ' from list ' +
+        newData[srcColumnId].name +
+        ' to list ' +
+        newData[destColumnId].name;
+      addActivity(content, typeActivity.EDIT_TABLE, this.idProject);
+    }
     newData[srcColumnId].rows.splice(indexOld, 1);
     newData[destColumnId].rows.splice(item.index(), 0, row);
    
     //update task noti
-    newData[destColumnId].rows[item.index()]
-      .assigns.forEach(user => 
-        updateTaskNoti(user.uid, this.idProject, srcColumnId, indexOld, destColumnId, item.index()))
-    firestore().collection('Projects').doc(this.idProject).update({
-      tasks: newData,
-    });
+    // newData[destColumnId].rows[item.index()]
+    //   .assigns.forEach(user => 
+    //     updateTaskNoti(user.uid, this.idProject, srcColumnId, indexOld, destColumnId, item.index()))
+    // firestore().collection('Projects').doc(this.idProject).update({
+    //   tasks: newData,
+    // });
   }
 }
 
@@ -326,7 +354,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   cardTask: {
-    width: 280,
+    width: 290,
     alignSelf: 'center',
   },
   iconEmpty: {

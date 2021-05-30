@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import AlertView from './AlertView';
 import {ListItem, Text, Radio} from 'native-base';
 import {View} from 'react-native';
-import {firestore} from '../../firebase';
+import {firestore, addActivity, typeActivity} from '../../firebase';
 import {colors} from '../../res/colors';
 import {typeAlert} from '.';
 
@@ -16,6 +16,16 @@ const EditMemberAlert = ({screen}) => {
     firestore().collection('Projects').doc(screen.idProject).update({
       members: newMembers,
     });
+
+    //add activity
+    let permission = isAdmin ? 'admin' : 'normal';
+    let content =
+      screen.currentUser.displayName +
+      ' change ' +
+      newMembers[screen.state.index].name +
+      "'s permissions to " +
+      permission;
+    addActivity(content, typeActivity.UPDATE_MEMBER, screen.idProject);
 
     screen.setState({
       members: newMembers,

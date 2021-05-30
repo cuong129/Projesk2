@@ -1,6 +1,15 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
+
+async function getProject(idProject) {
+  firestore()
+    .collection('Projects')
+    .doc(idProject)
+    .onSnapshot(querySnapshot => {
+      if (querySnapshot.exists) return null;
+    });
+}
 
 function updateProjectNoti(userID, currentUser, idProject) {
   firestore()
@@ -38,9 +47,10 @@ function deleteNoti(userID, itemID) {
       firestore()
         .collection('Users')
         .doc(userID)
-        .update({ notifications: arrNoti });
-    })
+        .update({notifications: arrNoti});
+    });
 }
+
 function seenNoti(userID, itemID) {
   firestore()
     .collection('Users')
@@ -80,37 +90,44 @@ function deleteAssignNoti(userID, idProject, columnIndex, index) {
     .then(documentSnapshot => {
       var arrNoti = documentSnapshot.data().notifications;
       //delete old assign noti if it exists
-      arrNoti = arrNoti.filter(item =>
-        !(item.idProject === idProject && (item.type === 'assign' || item.type === 'deadline')
-          && item.columnIndex === columnIndex && item.index === index));
-      firestore()
-        .collection('Users')
-        .doc(userID)
-        .update({
-          notifications: arrNoti,
-        });
-    })
+      arrNoti = arrNoti.filter(
+        item =>
+          !(
+            item.idProject === idProject &&
+            (item.type === 'assign' || item.type === 'deadline') &&
+            item.columnIndex === columnIndex &&
+            item.index === index
+          ),
+      );
+      firestore().collection('Users').doc(userID).update({
+        notifications: arrNoti,
+      });
+    });
 }
 function isNewUser(newArr, userID) {
   newArr.forEach(item => {
-    if (item.uid === userID)
-      return true;
+    if (item.uid === userID) return true;
   });
   return false;
 }
-function addAssignNoti(newArr, userID, currentUser, idProject, columnIndex, index, duedate, hasDateSelected) {
+function addAssignNoti(
+  newArr,
+  userID,
+  currentUser,
+  idProject,
+  columnIndex,
+  index,
+  duedate,
+  hasDateSelected,
+) {
   var date = new Date(duedate.getTime());
   date.setHours(new Date().getHours());
   date.setMinutes(new Date().getMinutes() - 1);
-  date.setDate(date.getDate() - 1);
-  console.log(date);
-  console.log(duedate);
-
   var objAssign = {
     id: uuidv4(),
     name: currentUser.displayName,
     photoURL: currentUser.photoURL,
-    type: "assign",
+    type: 'assign',
     idProject: idProject,
     columnIndex: columnIndex,
     index: index,
@@ -134,23 +151,58 @@ function addAssignNoti(newArr, userID, currentUser, idProject, columnIndex, inde
     .get()
     .then(documentSnapshot => {
       var arrNoti = documentSnapshot.data().notifications;
-      // notify assign to new users 
+      // notify assign to new users
       if (userID !== currentUser.uid && isNewUser(newArr, userID)) {
         arrNoti = [...arrNoti, objAssign];
       }
       // delete old deadline noti if due date doesn't exist now
-      arrNoti = arrNoti.filter(item =>
-        !(item.idProject === idProject && (item.type === 'deadline')
-          && item.columnIndex === columnIndex && item.index === index));
+      arrNoti = arrNoti.filter(
+        item =>
+          !(
+            item.idProject === idProject &&
+            item.type === 'deadline' &&
+            item.columnIndex === columnIndex &&
+            item.index === index
+          ),
+      );
       if (hasDateSelected) {
         arrNoti = [...arrNoti, objDeadline];
       }
-      firestore()
-        .collection('Users')
-        .doc(userID)
-        .update({
-          notifications: arrNoti,
-        });
+      firestore().collection('Users').doc(userID).update({
+        notifications: arrNoti,
+      });
+    });
+}
+
+const typeActivity = {
+  ADD_MEMBER: 0,
+  REMOVE_MEMBER: 1,
+  UPDATE_MEMBER: 2,
+  EDIT_PROJECT: 3,
+  LEAVE_PROJECT: 4,
+  ADD_LIST: 5,
+  DELETE_LIST: 6,
+  EDIT_LIST: 7,
+  EDIT_TABLE: 8,
+  ADD_TASK: 9,
+  EDIT_TASK: 10,
+  DELETE_TASK: 11,
+  COMPLETE_TASK: 12,
+  RESTORE_TASK: 13,
+  CREATE_PROJECT: 14,
+};
+
+function addActivity(content, type, idProject) {
+  const newAcitvity = {
+    content: content,
+    time: Date.now(),
+    type: type,
+  };
+  firestore()
+    .collection('Projects')
+    .doc(idProject)
+    .update({
+      activities: firestore.FieldValue.arrayUnion(newAcitvity),
     });
 }
 function addCommentNoti(userID, currentUser, idProject, columnIndex, index) {
@@ -235,5 +287,7 @@ export {
   addCommentNoti,
   deleteTaskNoti,
   deleteProjectNoti,
-  updateTaskNoti
+  updateTaskNoti,
+  typeActivity,
+  addActivity,
 };
