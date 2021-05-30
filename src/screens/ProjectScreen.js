@@ -20,6 +20,7 @@ import {
   FlatList,
   TextInput,
   Alert,
+  InteractionManager,
 } from 'react-native';
 import {colors} from '../res/colors';
 import ListTaskItem from '../components/ListTaskItem';
@@ -30,8 +31,9 @@ import {
   ProjectAlert,
   typeAlert,
 } from '../components/AlertCustom/index';
-import {auth, firestore} from '../firebase';
+import {auth, firestore, deleteProjectNoti, updateTaskNoti} from '../firebase';
 import OptionsMenu from 'react-native-options-menu';
+import { interpolateNode } from 'react-native-reanimated';
 
 export default class ProjectScreen extends Component {
   constructor(props) {
@@ -145,8 +147,11 @@ export default class ProjectScreen extends Component {
           text: 'Yes',
           style: 'destructive',
           onPress: () => {
-            if (currentMember.admin)
+            if (currentMember.admin) {
+              //delete all noti of members
+              this.state.project.members.forEach(user => deleteProjectNoti(user.uid, this.idProject));
               firestore().collection('Projects').doc(this.idProject).delete();
+            }
             else {
               firestore()
                 .collection('Users')
@@ -291,10 +296,13 @@ export default class ProjectScreen extends Component {
 
     const row = {...item.row()};
     const indexOld = newData[srcColumnId].rows.indexOf(row);
-
     newData[srcColumnId].rows.splice(indexOld, 1);
     newData[destColumnId].rows.splice(item.index(), 0, row);
-
+   
+    //update task noti
+    newData[destColumnId].rows[item.index()]
+      .assigns.forEach(user => 
+        updateTaskNoti(user.uid, this.idProject, srcColumnId, indexOld, destColumnId, item.index()))
     firestore().collection('Projects').doc(this.idProject).update({
       tasks: newData,
     });

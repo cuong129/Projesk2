@@ -43,7 +43,7 @@ import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import TagItem from '../components/TagItem';
 import TagColorBoard from '../components/TagColorBoard';
-import { auth, firestore, addDeadlineNoti, addAssignNoti, deleteAssignNoti, deleteDeadlineNoti } from '../firebase';
+import { auth, firestore, addDeadlineNoti, addAssignNoti, deleteAssignNoti, addCommentNoti, deleteTaskNoti } from '../firebase';
 import { typeAlert, AssignAlert } from '../components/AlertCustom';
 import FormatPeriodTime from '../utility/FormatPeriodTime'
 
@@ -99,7 +99,7 @@ export default class TaskScreen extends Component {
       newArrComment.sort((firstEl, secondEl) => {
         return secondEl.time - firstEl.time;
       });
-      this.setState({arrComment : newArrComment})
+      this.setState({ arrComment: newArrComment })
     }
     this.setState({
       taskName: task.name,
@@ -193,7 +193,6 @@ export default class TaskScreen extends Component {
   formatDate = date => {
     var hour = date.getHours();
     var minute = date.getMinutes();
-    if (hour < 10) hour = '0' + hour;
     if (minute < 10) minute = '0' + minute;
     return (
       `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ` +
@@ -307,7 +306,6 @@ export default class TaskScreen extends Component {
       //delete assign and deadline noti of old Assign who has been unassigned
       oldArr.forEach(user => {
         deleteAssignNoti(user.uid, idProject, columnIndex, index);
-        //deleteDeadlineNoti(user.uid, idProject, columnIndex, index);
       });
     }
     arrAssign.forEach(user => {
@@ -318,10 +316,11 @@ export default class TaskScreen extends Component {
   };
 
   handleDeleteTask = () => {
-    const { columnIndex, index } = this.props.route.params;
+    const { idProject, columnIndex, index } = this.props.route.params;
     var newTasks = this.state.tasks;
     newTasks[columnIndex].rows.splice(index, 1);
     this.UpdateTasks(newTasks);
+    this.state.arrAssign.forEach(user => deleteTaskNoti(user.uid, idProject, columnIndex, index));
     this.props.navigation.goBack();
   };
 
@@ -344,6 +343,7 @@ export default class TaskScreen extends Component {
         user: this.currentUser.displayName,
         date: firestore.Timestamp.fromDate(date),
       };
+      newTasks[columnIndex].rows[index].DueDate = this.state.date;
     } else {
       this.setState({
         completeDetail: 'This task is active',
@@ -420,30 +420,32 @@ export default class TaskScreen extends Component {
                 onChange={this.onChange}
               />
             )}
-            <Item style={styles.completeTitle}>
-              {this.state.completeBtn === 'RESTORE' && (
-                <Icon
-                  name="checkmark-circle-sharp"
-                  type="Ionicons"
-                  style={{ color: colors.Positive }}
-                />
-              )}
-              <Text style={{ fontSize: 16, color: 'gray', flex: 1 }}>
-                {this.state.completeDetail}
-              </Text>
-              <TouchableOpacity onPress={this.handlePressComplete}>
-                <Text
-                  style={{
-                    color:
-                      this.state.completeBtn === 'COMPLETE'
-                        ? colors.Positive
-                        : 'gray',
-                    fontWeight: 'bold',
-                  }}>
-                  {this.state.completeBtn}
+            {this.state.hasDateSelected && (
+              <Item style={styles.completeTitle}>
+                {this.state.completeBtn === 'RESTORE' && (
+                  <Icon
+                    name="checkmark-circle-sharp"
+                    type="Ionicons"
+                    style={{ color: colors.Positive }}
+                  />
+                )}
+                <Text style={{ fontSize: 16, color: 'gray', flex: 1 }}>
+                  {this.state.completeDetail}
                 </Text>
-              </TouchableOpacity>
-            </Item>
+                <TouchableOpacity onPress={this.handlePressComplete}>
+                  <Text
+                    style={{
+                      color:
+                        this.state.completeBtn === 'COMPLETE'
+                          ? colors.Positive
+                          : 'gray',
+                      fontWeight: 'bold',
+                    }}>
+                    {this.state.completeBtn}
+                  </Text>
+                </TouchableOpacity>
+              </Item>
+            )}
             <Item style={styles.titleItem}>
               <Input
                 value={this.state.taskName}
@@ -726,12 +728,17 @@ export default class TaskScreen extends Component {
   }
 
   updateCommand(newArrComment) {
-    const { columnIndex, index } = this.props.route.params;
+    const { idProject, columnIndex, index } = this.props.route.params;
     var newTasks = this.state.tasks;
 
     newTasks[columnIndex].rows[index].comments = newArrComment;
     this.setState({ arrComment: newArrComment });
     this.UpdateTasks(newTasks);
+    this.state.arrAssign.forEach(user => {
+      if (user.uid !== this.currentUser.uid) {
+        addCommentNoti(user.uid, this.currentUser, idProject, columnIndex, index);
+      }
+    })
 
   }
 }

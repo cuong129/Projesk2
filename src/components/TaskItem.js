@@ -31,23 +31,17 @@ export default class TaskItem extends Component {
   }
   dateDiff(start, end) {
     var startDate = new Date(start.toDate());
-    startDate.setSeconds(0);
     var endDate = new Date(end.toDate());
-    endDate.setSeconds(0);
     return Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
   }
   hourDiff(start, end) {
     var startDate = new Date(start.toDate());
-    startDate.setSeconds(0);
     var endDate = new Date(end.toDate());
-    endDate.setSeconds(0);
     return Math.floor((endDate - startDate) / (1000 * 60 * 60)) % 24;
   }
   minuteDiff(start, end) {
     var startDate = new Date(start.toDate());
-    startDate.setSeconds(0);
     var endDate = new Date(end.toDate());
-    endDate.setSeconds(0);
     return Math.floor((endDate - startDate) / (1000 * 60)) % 60;
   }
   renderCompleteTime(start, end) {
@@ -57,6 +51,8 @@ export default class TaskItem extends Component {
     const str2 = hour !== 0 ? hour + 'h' : '';
     const minute = this.minuteDiff(start, end);
     const str3 = minute !== 0 ? minute + 'min' : '';
+    if (date === 0 && hour === 0 && minute === 0)
+      return '1 min';
     return str1 + ' ' + str2 + ' ' + str3;
   }
   formatDate(date) {

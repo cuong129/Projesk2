@@ -22,6 +22,7 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {AuthContext} from './context';
+import {colors} from './res/colors';
 
 const Stack = createStackNavigator();
 const Home = createStackNavigator();
@@ -197,6 +198,24 @@ function ProjectScreen() {
 }
 
 function MainScreen() {
+  const [NumNoti, setNumNoti] = React.useState(0);
+  React.useEffect(() => {
+    firestore()
+    .collection('Users')
+    .doc(auth().currentUser.uid)
+    .onSnapshot(documentSnapshot => {
+      var data = documentSnapshot.data().notifications;
+      data = data.filter(item => item.date.toDate().getTime() <= new Date().getTime());
+      let num = 0;
+      data.forEach(item => {
+        if (!item.seen) {
+          num++;
+        }
+      });
+      setNumNoti(num);
+    });
+  });
+
   return (
     <Tab.Navigator
       tabBar={props => {
@@ -209,8 +228,8 @@ function MainScreen() {
                   vertical
                   active={props.state.index === 0}
                   onPress={() => props.navigation.navigate('Notify')}>
-                  <Badge>
-                    <Text>0</Text>
+                  <Badge style={{backgroundColor: NumNoti === 0 ? 'transparent' : colors.Danger}}>
+                    <Text>{NumNoti}</Text>
                   </Badge>
                   <Icon name="notifications" />
                   <Text>Notify</Text>

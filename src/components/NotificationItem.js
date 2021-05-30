@@ -3,6 +3,7 @@ import { StyleSheet, TouchableOpacity, View, Text, Image } from 'react-native';
 import { Icon } from 'native-base';
 import { colors, ColorBoard } from '../res/colors';
 import { firestore } from '../firebase';
+import FormatPeriodTime from '../utility/FormatPeriodTime';
 
 export default class NotificationItem extends Component {
   constructor(props) {
@@ -35,9 +36,9 @@ export default class NotificationItem extends Component {
     const { project } = this.state;
 
     this.setState({
-      name: item.type === 'deadline' || item.type === 'assign'
+      name: item.type === 'deadline' || item.type === 'assign' || item.type === 'comment'
         ? project.tasks[item.columnIndex].rows[item.index].name
-        : project.name
+        : project.name,
     });
     if (item.type === 'invite') {
       this.setState({
@@ -64,6 +65,12 @@ export default class NotificationItem extends Component {
         iconColor: ColorBoard[0],
         time: this.formatTime(item.duedate),
       });
+    } else if (item.type === 'comment') {
+      this.setState({
+        detail: "commented in your task ",
+        iconName: "chatbox-sharp",
+        iconColor: ColorBoard[3],
+      })
     }
   }
   formatTime(duedate) {
@@ -78,9 +85,11 @@ export default class NotificationItem extends Component {
   }
   render() {
     const { item, onPressItem, onPressDelete } = this.props;
-    const { detail, iconName, iconColor, project } = this.state;
+    const { detail, iconName, iconColor, project} = this.state;
     return (
-      <TouchableOpacity style={styles.container} onPress={() => { onPressItem(item.id) }}>
+      <TouchableOpacity 
+        style={[styles.container, {backgroundColor: item.seen ? '#FFF' : '#DBF3FA' }] } 
+        onPress={() => { onPressItem(item.id) }}>
         <View style={{ padding: 10, paddingRight: 20, }}>
           <Image
             style={styles.imageCircle}
@@ -103,7 +112,9 @@ export default class NotificationItem extends Component {
               </View>
             )}
           </View>
-          <Text style={{ justifyContent: 'flex-end' }}>5 minutes ago</Text>
+          <Text style={[styles.timeNoti, {fontWeight: item.seen ? 'normal' : 'bold' }]}>
+            {FormatPeriodTime(item.date.toDate().getTime())}
+          </Text>
         </View>
         <TouchableOpacity onPress={() => onPressDelete(item.id)}>
           <Icon name="circle-with-cross" type='Entypo' style={{ color: colors.Danger, fontSize: 20, paddingHorizontal: 15 }} />
@@ -114,7 +125,6 @@ export default class NotificationItem extends Component {
 }
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -139,6 +149,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     position: 'absolute',
     left: 7,
-    top: 6,
+    top: 6.5,
+  },
+  timeNoti: {
+    justifyContent: 'flex-end', 
+    fontSize: 12, 
+    paddingTop: 3 
   }
 })

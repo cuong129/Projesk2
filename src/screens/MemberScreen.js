@@ -18,7 +18,7 @@ import { StatusBar, StyleSheet, View, FlatList, Alert } from 'react-native';
 import getTheme from '../native-base-theme/components';
 import material from '../native-base-theme/variables/material';
 import { colors } from '../res/colors';
-import { auth, firestore, updateProjectNoti, addProjectNoti } from '../firebase';
+import { auth, firestore, updateProjectNoti } from '../firebase';
 import {
   typeAlert,
   AddMemberAlert,

@@ -12,12 +12,22 @@ function FormatPeriodTime(startTime) {
       date.getUTCFullYear() +
       ' ' +
       date.getHours() +
-      ':' +
-      date.getUTCMinutes();
+      ':';
+      if (date.getUTCMinutes() < 9) {
+        dateString += '0' + date.getUTCMinutes();
+      } else {
+        dateString += date.getUTCMinutes();
+      }
   } else if (periodTime >= 3600) {
-    dateString = Math.floor(periodTime / 3600) + ' hours ago';
+    var hour = Math.floor(periodTime / 3600);
+    dateString = hour === 1 
+    ? hour + ' hour ago'
+    : hour + ' hours ago';
   } else if (periodTime >= 60) {
-    dateString = Math.floor(periodTime / 60) + ' minustes ago';
+    var min = Math.floor(periodTime / 60);
+    dateString = min === 1 
+    ? min + ' minute ago'
+    : min + ' minutes ago';
   } else dateString = 'just now';
   return dateString;
 }

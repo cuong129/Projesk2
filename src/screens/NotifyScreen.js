@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { Container } from 'native-base';
 import { colors } from '../res/colors'
-import { auth, firestore, deleteNoti } from '../firebase'
+import { auth, firestore, deleteNoti, seenNoti } from '../firebase'
 import NotificationItem from '../components/NotificationItem';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
@@ -19,7 +19,12 @@ export default class NotifyScreen extends Component {
       .collection('Users')
       .doc(this.currentUser.uid)
       .onSnapshot(documentSnapshot => {
-        this.setState({arrNoti: documentSnapshot.data().notifications})
+        var data = documentSnapshot.data().notifications;
+        data = data.filter(item => item.date.toDate().getTime() <= new Date().getTime());
+        data.sort((firstEl, secondEl) => {
+          return secondEl.date.toDate().getTime() - firstEl.date.toDate().getTime();
+        });
+        this.setState({arrNoti: data})
       });
     return () => this.subscriber();
   }
@@ -29,6 +34,11 @@ export default class NotifyScreen extends Component {
   handlePressItem = (id) => {
     const { arrNoti } = this.state;
     const index = arrNoti.findIndex(item => item.id === id);
+    
+    if (!arrNoti[index].seen) {
+      seenNoti(this.currentUser.uid, id);
+    }
+
     if (arrNoti[index].type === 'invite') {
       this.props.navigation.navigate('Project', {
         screen: 'ProjectMain',
@@ -37,7 +47,7 @@ export default class NotifyScreen extends Component {
         },
       })
     }
-    else if (arrNoti[index].type === 'assign' || arrNoti[index].type === 'deadline') {
+    else if (arrNoti[index].type === 'assign' || arrNoti[index].type === 'deadline' || arrNoti[index].type === 'comment') {
       this.props.navigation.navigate('Project', {
         screen: 'Task',
         params: {
