@@ -56,7 +56,7 @@ export default class MyProjectScreen extends Component {
         this.getAllInfoProject(MyProjectIds, 0, projects);
       });
     // Unsubscribe from events when no longer in use
-    return () => subscriber();
+    return () => this.subscriber();
   }
 
   componentWillUnmount() {

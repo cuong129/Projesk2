@@ -47,7 +47,7 @@ export default class MyProjectScreen extends Component {
       });
 
     // Unsubscribe from events when no longer in use
-    return () => subscriber();
+    return () => this.subscriber();
   }
 
   componentWillUnmount() {
@@ -189,7 +189,7 @@ export default class MyProjectScreen extends Component {
   }
 
   handleSearch(text) {
-    this.data = this.state.projects.filter(e => e.name == text);
+    this.data = this.state.projects.filter(e =>  e.name.toLowerCase().includes(text.toLowerCase()));
     this.setState({isSearch: true});
   }
 }

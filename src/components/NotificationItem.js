@@ -88,7 +88,7 @@ export default class NotificationItem extends Component {
     const { detail, iconName, iconColor, project} = this.state;
     return (
       <TouchableOpacity 
-        style={[styles.container, {backgroundColor: item.seen ? '#FFF' : '#DBF3FA' }] } 
+        style={[styles.container, {backgroundColor: item.seen ? '#FFF' : '#F0F2F5' }] } 
         onPress={() => { onPressItem(item.id) }}>
         <View style={{ padding: 10, paddingRight: 20, }}>
           <Image

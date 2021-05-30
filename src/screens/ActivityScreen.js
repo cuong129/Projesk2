@@ -2,9 +2,6 @@ import React, {Component} from 'react';
 import {
   Container,
   Header,
-  Content,
-  List,
-  ListItem,
   Text,
   StyleProvider,
   Left,
@@ -32,6 +29,8 @@ export default class ActivityScreen extends Component {
   render() {
     const {navigation} = this.props;
     const {activities}=this.props.route.params;
+    const {isFilter}= this.state
+    this.data = isFilter ? this.data : [...activities];
 
     return (
       <StyleProvider style={getTheme(material)}>
@@ -56,10 +55,12 @@ export default class ActivityScreen extends Component {
             <SearchBar
               style={styles.searchBar}
               placeholder="Search activities..."
+              onSearch ={(text)=>this.handleSearch(text)}
+              endSearch={() => this.setState({isFilter: false})}
             />
           </View>
           <FlatList
-            data={activities}
+            data={this.data}
             renderItem={item => this.renderItem(item)}
             keyExtractor={(item, index) => index}
           />
@@ -86,6 +87,12 @@ export default class ActivityScreen extends Component {
         </View>
       </View>
     );
+  }
+
+  handleSearch(text) {
+    const {activities}=this.props.route.params;
+    this.data = activities.filter(e => e.content.toLowerCase().includes(text.toLowerCase()));
+    this.setState({isFilter: true});
   }
 }
 

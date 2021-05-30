@@ -31,6 +31,7 @@ export default class NotifyScreen extends Component {
   componentWillUnmount() {
     this.subscriber();
   }
+
   handlePressItem = (id) => {
     const { arrNoti } = this.state;
     const index = arrNoti.findIndex(item => item.id === id);

@@ -201,20 +201,26 @@ function ProjectScreen() {
 function MainScreen() {
   const [NumNoti, setNumNoti] = React.useState(0);
   React.useEffect(() => {
-    firestore()
-    .collection('Users')
-    .doc(auth().currentUser.uid)
-    .onSnapshot(documentSnapshot => {
-      var data = documentSnapshot.data().notifications;
-      data = data.filter(item => item.date.toDate().getTime() <= new Date().getTime());
-      let num = 0;
-      data.forEach(item => {
-        if (!item.seen) {
-          num++;
-        }
+    const subscriber = firestore()
+      .collection('Users')
+      .doc(auth().currentUser.uid)
+      .onSnapshot(documentSnapshot => {
+        var data = documentSnapshot.data().notifications;
+        data = data.filter(
+          item => item.date.toDate().getTime() <= new Date().getTime(),
+        );
+        let num = 0;
+        data.forEach(item => {
+          if (!item.seen) {
+            num++;
+          }
+        });
+        setNumNoti(num);
       });
-      setNumNoti(num);
-    });
+
+    return () => {
+      subscriber();
+    };
   });
 
   return (
@@ -229,7 +235,11 @@ function MainScreen() {
                   vertical
                   active={props.state.index === 0}
                   onPress={() => props.navigation.navigate('Notify')}>
-                  <Badge style={{backgroundColor: NumNoti === 0 ? 'transparent' : colors.Danger}}>
+                  <Badge
+                    style={{
+                      backgroundColor:
+                        NumNoti === 0 ? 'transparent' : colors.Danger,
+                    }}>
                     <Text>{NumNoti}</Text>
                   </Badge>
                   <Icon name="notifications" />

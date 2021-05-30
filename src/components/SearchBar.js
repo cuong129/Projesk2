@@ -29,7 +29,7 @@ export default class SearchBar extends Component {
               style={styles.iconSearch}
               onPress={() => {
                 this.setState({search: false});
-                endSearch();
+                if (endSearch) endSearch();
               }}
             />
           </View>
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   searchView: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#C3C2C8',
+    backgroundColor: '#F0F2F5',
     borderRadius: 20,
   },
   inputStyle: {
