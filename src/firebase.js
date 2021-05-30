@@ -123,6 +123,7 @@ function addAssignNoti(
   var date = new Date(duedate.getTime());
   date.setHours(new Date().getHours());
   date.setMinutes(new Date().getMinutes() - 1);
+  date.setDate(date.getDate() - 1);
   var objAssign = {
     id: uuidv4(),
     name: currentUser.displayName,
