@@ -310,7 +310,7 @@ export default class ProjectScreen extends Component {
 
   onDragEnd(srcColumnId, destColumnId, item) {
     const newData = [...this.state.project.tasks];
-    const row = {...item.row()};
+    const row = item.row();
     const indexOld = newData[srcColumnId].rows.indexOf(row);
     if (srcColumnId != destColumnId) {
       //add activity
