@@ -22,9 +22,8 @@ const ProjectAlert = ({screen, type}) => {
   );
 
   const onTextChange = text => {
-    const content = text.trim();
-    setInputName(content);
-    if (!text || content === '') {
+    setInputName(text);
+    if (!text || text.trim() === '') {
       if (isEmptyInput == -1) return;
       setIconInput('close-circle');
       setIsEmptyInput(-1);

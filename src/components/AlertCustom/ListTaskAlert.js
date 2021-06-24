@@ -39,9 +39,8 @@ const ListTaskAlert = ({screen, type}) => {
   };
 
   const onTextChange = text => {
-    const content = text.trim();
-    setInputText(content);
-    if (content === '') {
+    setInputText(text);
+    if (text.trim() === '') {
       if (isEmptyInput == -1) return;
       setIconInput('close-circle');
       setIsEmptyInput(-1);

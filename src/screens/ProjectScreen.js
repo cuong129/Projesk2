@@ -331,9 +331,9 @@ export default class ProjectScreen extends Component {
     // newData[destColumnId].rows[item.index()]
     //   .assigns.forEach(user => 
     //     updateTaskNoti(user.uid, this.idProject, srcColumnId, indexOld, destColumnId, item.index()))
-    // firestore().collection('Projects').doc(this.idProject).update({
-    //   tasks: newData,
-    // });
+    firestore().collection('Projects').doc(this.idProject).update({
+      tasks: newData,
+    });
   }
 }
 
