@@ -8,7 +8,7 @@
 5. [Giấy phép](#giấy-phép)
 
 ## Chức năng
-https://github.com/cuong129/Projesk2/blob/main/screenshots/actitivty.jpg
+![](screenshots/actitivty.jpg)
 ## Yêu cầu thiết bị
 - Android:
   + Gradle: 4.1
