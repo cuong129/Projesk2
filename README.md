@@ -2,6 +2,15 @@
 Ứng dụng quản lý công việc nhóm giúp tăng cao hiệu suất làm việc của các thành viên
 ## Nội dung
 1. [Chức năng](#chức-năng)
+    - [Đăng nhập](#đăng-nhập)
+    - [Quản lý các project](#quản-lý-các-project)
+    - [Quản lý các task](#quản-lý-các-task)
+    - [Xem danh sách các task có trong project](#xem-danh-sách-các-task-có-trong-project)
+    - [Xem hoạt động và các thành viên có trong project](#xem-hoạt-động-và-các-thành-viên-có-trong-project)
+    - [Xem thông tin chi tiết của task](#xem-thông-tin-chi-tiết-của-task)
+    - [Thông tin người dùng](#thông-tin-người-dùng)
+    - [Thông báo](#thông-báo)
+    
 2. [Yêu cầu thiết bị](#yêu-cầu-thiết-bị)
 3. [Thư viện và công nghệ](#thư-viện-và-công-nghệ)
 4. [Tác giả](#tác-giả)
