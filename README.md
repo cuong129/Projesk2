@@ -8,7 +8,47 @@
 5. [Giấy phép](#giấy-phép)
 
 ## Chức năng
-![](screenshots/actitivty.jpg)
+### Đăng nhập
+<p align="center">
+<img src="screenshots/login.jpg" width="270"/> 
+</p>
+
+### Quản lý các project
+<p align="center">
+<img src="screenshots/myproject.jpg" width="270"/>
+</p>
+
+### Quản lý các task
+<p align="center">
+<img src="screenshots/mytask.jpg" width="270"/> 
+</p>
+
+### Xem danh sách các task có trong project
+<p align="center">
+<img src="screenshots/tasklist.jpg" width="270"/> 
+</p>
+
+### Xem hoạt động và các thành viên có trong project
+<p align="center">
+<img src="screenshots/activity.jpg" width="270"/> <img src="screenshots/member.jpg" width="270"/> 
+</p>
+
+### Xem thông tin chi tiết của task
+<p align="center">
+<img src="screenshots/taskdetail.jpg" width="270"/> 
+</p>
+
+## Thông tin người dùng
+<p align="center">
+<img src="screenshots/info.jpg" width="270"/> 
+</p>
+
+### Thông báo 
+<p align="center">
+<img src="screenshots/noti.jpg" width="270"/> 
+</p>
+
+
 ## Yêu cầu thiết bị
 - Android:
   + Gradle: 4.1
