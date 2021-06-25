@@ -13,8 +13,9 @@
     
 2. [Yêu cầu thiết bị](#yêu-cầu-thiết-bị)
 3. [Thư viện và công nghệ](#thư-viện-và-công-nghệ)
-4. [Tác giả](#tác-giả)
-5. [Giấy phép](#giấy-phép)
+4. [Cơ sở dữ liệu](#cơ-sở-dữ-liệu)
+5. [Tác giả](#tác-giả)
+6. [Giấy phép](#giấy-phép)
 
 ## Chức năng
 ### Đăng nhập
@@ -72,6 +73,11 @@
 - react-native - https://github.com/facebook/react-native
 - react-navigation - https://github.com/react-navigation/react-navigation
 - react-native-firebase - https://github.com/invertase/react-native-firebase
+## Cơ sở dữ liệu
+<p align="center">
+<img src="screenshots/diagram.png"/>
+</p>
+
 ## Tác giả
 - Nguyễn Xuân Luân - 18521066@gm.uit.edu.vn
 - Phan Đức Cường - 18520547@gm.uit.edu.vn
