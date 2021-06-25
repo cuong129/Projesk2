@@ -86,7 +86,7 @@
 - native-base - https://github.com/GeekyAnts/NativeBase
 ## Sơ đồ quan hệ
 <p align="center">
-<img src="screenshots/dbdiagram.png"/>
+<img src="screenshots/dbdiagram.png" height=600/>
 </p>
 
 ## Tác giả
