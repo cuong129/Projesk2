@@ -48,7 +48,7 @@
 <img src="screenshots/taskdetail.jpg" width="270"/> 
 </p>
 
-## Thông tin người dùng
+### Thông tin người dùng
 <p align="center">
 <img src="screenshots/info.jpg" width="270"/> 
 </p>
