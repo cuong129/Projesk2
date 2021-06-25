@@ -2,50 +2,60 @@
 Ứng dụng quản lý công việc nhóm giúp tăng cao hiệu suất làm việc của các thành viên
 ## Nội dung
 1. [Chức năng](#chức-năng)
-    - [Đăng nhập](#đăng-nhập)
-    - [Quản lý các project](#quản-lý-các-project)
-    - [Quản lý các task](#quản-lý-các-task)
-    - [Xem danh sách các task có trong project](#xem-danh-sách-các-task-có-trong-project)
-    - [Xem hoạt động và các thành viên có trong project](#xem-hoạt-động-và-các-thành-viên-có-trong-project)
+    - [Đăng nhập / Đăng ký](#đăng-nhập--đăng-ký)
+    - [Quản lý các project của tôi](#quản-lý-các-project-của-tôi)
+    - [Quản lý các task của tôi](#quản-lý-các-task-của-tôi)
+    - [Quản lý các task trong project](#quản-lý-các-task-trong-project)
+    - [Quản lý thành viên của project](#quản-lý-thành-viên-của-project)
+    - [Xem hoạt động của các thành viên](#xem-hoạt-động-của-các-thành-viên)
     - [Xem thông tin chi tiết của task](#xem-thông-tin-chi-tiết-của-task)
     - [Thông tin người dùng](#thông-tin-người-dùng)
     - [Thông báo](#thông-báo)
     
 2. [Yêu cầu thiết bị](#yêu-cầu-thiết-bị)
 3. [Thư viện và công nghệ](#thư-viện-và-công-nghệ)
-4. [Cơ sở dữ liệu](#cơ-sở-dữ-liệu)
+4. [Sơ đồ quan hệ](#sơ-đồ-quan-hệ)
 5. [Tác giả](#tác-giả)
 6. [Giấy phép](#giấy-phép)
 
 ## Chức năng
-### Đăng nhập
+### Đăng nhập / Đăng ký
 <p align="center">
-<img src="screenshots/login.jpg" width="270"/> 
+<img src="screenshots/signin.jpg" width="270"/> 
+<img src="screenshots/signup.jpg" width="270"/> 
 </p>
 
-### Quản lý các project
+### Quản lý các project của tôi
 <p align="center">
 <img src="screenshots/myproject.jpg" width="270"/>
 </p>
 
-### Quản lý các task
+### Quản lý các task của tôi
 <p align="center">
 <img src="screenshots/mytask.jpg" width="270"/> 
 </p>
 
-### Xem danh sách các task có trong project
+### Quản lý các task trong project
 <p align="center">
-<img src="screenshots/tasklist.jpg" width="270"/> 
+<img src="screenshots/project1.jpg" width="270"/> 
+<img src="screenshots/project2.jpg" width="270"/> 
 </p>
 
-### Xem hoạt động và các thành viên có trong project
+### Quản lý thành viên của project
 <p align="center">
-<img src="screenshots/activity.jpg" width="270"/> <img src="screenshots/member.jpg" width="270"/> 
+<img src="screenshots/member.jpg" width="270"/>
+<img src="screenshots/member1.jpg" width="270"/>
+</p>
+
+### Xem hoạt động của các thành viên
+<p align="center">
+<img src="screenshots/activity.jpg" width="270"/>
 </p>
 
 ### Xem thông tin chi tiết của task
 <p align="center">
-<img src="screenshots/taskdetail.jpg" width="270"/> 
+<img src="screenshots/task1.jpg" width="270"/> 
+<img src="screenshots/task2.jpg" width="270"/> 
 </p>
 
 ### Thông tin người dùng
@@ -73,9 +83,10 @@
 - react-native - https://github.com/facebook/react-native
 - react-navigation - https://github.com/react-navigation/react-navigation
 - react-native-firebase - https://github.com/invertase/react-native-firebase
-## Cơ sở dữ liệu
+- native-base - https://github.com/GeekyAnts/NativeBase
+## Sơ đồ quan hệ
 <p align="center">
-<img src="screenshots/diagram.png"/>
+<img src="screenshots/dbdiagram.png"/>
 </p>
 
 ## Tác giả
