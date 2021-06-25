@@ -25,6 +25,7 @@ import {AuthContext} from './context';
 import {colors} from './res/colors';
 
 const Stack = createStackNavigator();
+const Init = createStackNavigator();
 const Home = createStackNavigator();
 const Project = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -159,15 +160,7 @@ export default function AppNavigation({navigation}) {
             <Stack.Screen name="Splash" component={screen.SplashScreen} />
           ) : state.userToken == null ? (
             // No token found, user isn't signed in
-            <Stack.Screen
-              name="SignIn"
-              component={screen.SignInSceen}
-              options={{
-                title: 'Sign in',
-                // When logging out, a pop animation feels intuitive
-                animationTypeForReplace: state.isSignout ? 'pop' : 'push',
-              }}
-            />
+            <Stack.Screen name="Init" component={InitScreen} />
           ) : (
             // User is signed in
             <Stack.Screen name="Home" component={HomeScreen} />
@@ -175,6 +168,15 @@ export default function AppNavigation({navigation}) {
         </Stack.Navigator>
       </NavigationContainer>
     </AuthContext.Provider>
+  );
+}
+
+function InitScreen() {
+  return (
+    <Init.Navigator headerMode="none">
+      <Init.Screen name="SignIn" component={screen.SignInSceen} />
+      <Init.Screen name="SignUp" component={screen.SignUpScreen} />
+    </Init.Navigator>
   );
 }
 

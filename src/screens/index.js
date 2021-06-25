@@ -1,5 +1,6 @@
 import SplashScreen from './SplashScreen'
 import SignInSceen from './SignInScreen';
+import SignUpScreen from './SignUpScreen';
 
 import NotifyScreen from './NotifyScreen';
 import MyProjectScreen from './MyProjectScreen';
@@ -14,6 +15,7 @@ import ActivityScreen from './ActivityScreen';
 export {
   SplashScreen,
   SignInSceen,
+  SignUpScreen,
   NotifyScreen,
   MyProjectScreen,
   MyTaskScreen,

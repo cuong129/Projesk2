@@ -22,71 +22,33 @@ import {
   AppRegistry,
   StatusBar,
   ActivityIndicator,
-  Modal
+  Modal,
 } from 'react-native';
 import {colors} from '../res/colors';
 import images from '../res/images';
 import {AuthContext} from '../context';
 
-export default class SignInScreen extends Component {
+export default class SignUpScreen extends Component {
   static contextType = AuthContext;
   constructor(props) {
     super(props);
-
-    this.state = {
-      email: '',
-      password: '',
-      isHiddenPassword: true,
-      IconShowPassword: 'eye',
-      loading: false,
-    };
   }
 
-  componentDidMount() {}
-  handleShowPasswordPress = () => {
-    const {isHiddenPassword, IconShowPassword} = this.state;
-    if (isHiddenPassword) {
-      this.setState({IconShowPassword: 'eye-off'});
-    } else {
-      this.setState({IconShowPassword: 'eye'});
-    }
-    this.setState({isHiddenPassword: !isHiddenPassword});
-  };
-  handleSignInButton = () => {
-    const {email, password} = this.state;
-    console.log(email);
-    console.log(password);
-  };
-
   render() {
-    const {
-      email,
-      password,
-      isHiddenPassword,
-      IconShowPassword,
-      loading,
-    } = this.state;
-    const {signIn} = this.context;
     return (
       <Container>
-        <StatusBar barStyle="light-content" backgroundColor={colors.Primary} />
-        <Modal animationType="fade" transparent={true} visible={loading}>
-          <View style={styles.centeredView}>
-            <ActivityIndicator color={colors.Primary} size="large" />
-          </View>
-        </Modal>
+        <StatusBar barStyle="dark-content" backgroundColor="white" />
         <View style={styles.header}>
-          <Image source={images.logo} style={styles.logo} />
-          <View>
-            <Text style={{color: 'white', fontSize: 10}}>Welcome to</Text>
-            <Text style={{color: 'white', fontSize: 20}}>ProJesk</Text>
-          </View>
+          <Icon
+            name="arrow-back-sharp"
+            style={{alignSelf: 'flex-start'}}
+            onPress={() => this.props.navigation.goBack()}
+          />
+          <Text style={{fontSize: 24, marginTop: 40}}>Let's Get Started!</Text>
+          <Text note>Create an account to Projesk to get all features</Text>
         </View>
         <Content>
           <View style={styles.body}>
-            <Text style={{alignSelf: 'center', marginVertical: 10}}>
-              Sign in to your account
-            </Text>
             <Item floatingLabel style={styles.textInput}>
               <Icon name="mail-sharp" style={styles.icon} />
               <Label style={styles.label}>Email</Label>
@@ -103,41 +65,35 @@ export default class SignInScreen extends Component {
               <Icon name="key" style={styles.icon} type="Fontisto" />
               <Label style={styles.label}>Password</Label>
               <Input
-                secureTextEntry={isHiddenPassword}
                 onChangeText={text => this.setState({password: text})}
                 getRef={r => (this.passwordRef = r)}
               />
               <Icon
-                name={IconShowPassword}
                 style={styles.icon}
                 onPress={this.handleShowPasswordPress}
               />
             </Item>
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Forgot password?</Text>
-            </TouchableOpacity>
-            <Button
-              backgroundColor={colors.Primary}
-              style={styles.button}
-              onPress={this.handleSignInButton}>
-              <Text style={styles.buttonText}>Sign in</Text>
-            </Button>
-            <Text note style={{alignSelf: 'center'}}>
-              Or With
-            </Text>
-            <Button
-              backgroundColor="#DF4531"
-              style={styles.button}
-              onPress={() => signIn(this)}>
-              <Icon name="logo-google" style={{position: 'absolute'}} />
-              <Text style={styles.buttonText}>Google</Text>
+            <Item floatingLabel style={styles.textInput}>
+              <Icon name="unlocked" style={styles.icon} type="Fontisto" />
+              <Label style={styles.label}>Confirm Password</Label>
+              <Input
+                onChangeText={text => this.setState({password: text})}
+                getRef={r => (this.passwordRef = r)}
+              />
+              <Icon
+                style={styles.icon}
+                onPress={this.handleShowPasswordPress}
+              />
+            </Item>
+            <Button backgroundColor={colors.Primary} style={styles.button}>
+              <Text style={styles.buttonText}>Sign up</Text>
             </Button>
           </View>
           <View style={styles.footer}>
-            <Text note>Don't have an account?</Text>
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}>
+            <Text note>Already have an account?</Text>
+            <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
               <Text style={{color: colors.Primary, marginHorizontal: 5}}>
-                Sign up
+                Sign in
               </Text>
             </TouchableOpacity>
           </View>
@@ -159,8 +115,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
-    backgroundColor: colors.Primary,
-    flexDirection: 'row',
+    flexDirection: 'column',
+    paddingHorizontal: 30,
   },
   body: {
     flex: 1,
@@ -187,6 +143,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     marginVertical: 15,
+    marginTop: 50,
     borderRadius: 6,
   },
   label: {
