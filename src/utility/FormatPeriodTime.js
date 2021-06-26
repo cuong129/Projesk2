@@ -3,7 +3,7 @@ function FormatPeriodTime(startTime) {
   let periodTime = (Date.now() - startTime) / 1000; //get seconds
 
   if (periodTime > 86400) {
-    let date = new Date(periodTime * 1000);
+    let date = new Date(startTime);
     dateString =
       date.getUTCDate() +
       '/' +
