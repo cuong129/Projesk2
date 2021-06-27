@@ -3,8 +3,8 @@
 ## Nội dung
 1. [Chức năng](#chức-năng)
     - [Đăng nhập / Đăng ký](#đăng-nhập--đăng-ký)
-    - [Quản lý các project của tôi](#quản-lý-các-project-của-tôi)
-    - [Quản lý các task của tôi](#quản-lý-các-task-của-tôi)
+    - [Quản lý các project](#quản-lý-các-project)
+    - [Quản lý các task của cá nhân](#quản-lý-các-task-của-cá-nhân)
     - [Quản lý các task trong project](#quản-lý-các-task-trong-project)
     - [Quản lý thành viên của project](#quản-lý-thành-viên-của-project)
     - [Xem hoạt động của các thành viên](#xem-hoạt-động-của-các-thành-viên)
@@ -25,12 +25,12 @@
 <img src="screenshots/signup.jpg" width="270"/> 
 </p>
 
-### Quản lý các project của tôi
+### Quản lý các project
 <p align="center">
 <img src="screenshots/myproject.jpg" width="270"/>
 </p>
 
-### Quản lý các task của tôi
+### Quản lý các task của cá nhân
 <p align="center">
 <img src="screenshots/mytask.jpg" width="270"/> 
 </p>
